@@ -1,0 +1,7 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 모든 읽기/쓰기는 서버(Admin SDK)에서만. 브라우저의 직접 접근은 전부 차단.
+    match /{document=**} { allow read, write: if false; }
+  }
+}
