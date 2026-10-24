@@ -1,8 +1,10 @@
 const csp = [
   "default-src 'self'",
   "img-src 'self' data: https:",
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+  "font-src 'self' https://cdn.jsdelivr.net",
   "script-src 'self' 'unsafe-inline'",
+  "connect-src 'self' https://storage.googleapis.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

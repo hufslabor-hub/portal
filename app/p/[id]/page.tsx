@@ -1,4 +1,4 @@
-import Markdown from 'react-markdown';
+import Md from '@/components/Md';
 import { notFound } from 'next/navigation';
 import { getPost } from '@/lib/content';
 
@@ -9,16 +9,16 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const post = await getPost(id);
   if (!post) notFound();
   return (
-    <article>
-      <h1>{post.title}</h1>
+    <main><div className="wrap"><article>
+      <h1 className="pt">{post.title}</h1>
       <p className="meta">{post.createdAt.slice(0, 10)}</p>
-      <div className="prose"><Markdown>{post.body}</Markdown></div>
+      <div className="prose"><Md text={post.body} /></div>
       {post.files.length > 0 && (
         <>
           <h2>첨부파일</h2>
-          <ul>{post.files.map((f) => <li key={f.url}><a href={f.url} rel="noopener noreferrer">{f.name}</a></li>)}</ul>
+          <ul className="files">{post.files.map((f) => <li key={f.url}><a href={f.url} rel="noopener noreferrer">{f.name}</a></li>)}</ul>
         </>
       )}
-    </article>
+    </article></div></main>
   );
 }

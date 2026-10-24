@@ -9,14 +9,13 @@ export default async function Category({ params }: { params: Promise<{ cat: stri
   if (!isCat(cat)) notFound();
   const posts = await getPosts(cat, 50);
   return (
-    <>
-      <h1>{CATEGORIES[cat]}</h1>
-      <ul className="list">
-        {posts.map((p) => (
-          <li key={p.id}><Link href={`/p/${p.id}`}>{p.title}</Link><time>{p.createdAt.slice(0, 10)}</time></li>
-        ))}
-        {!posts.length && <li>게시글이 없습니다.</li>}
+    <main><div className="wrap">
+      <div className="chips">{Object.entries(CATEGORIES).map(([k, n]) => <Link key={k} href={`/c/${k}`} className={k === cat ? 'on' : ''}>{n}</Link>)}</div>
+      <h1 className="pt">{CATEGORIES[cat]}</h1>
+      <ul className="cards">
+        {posts.map((p) => <li key={p.id}><Link href={`/p/${p.id}`}><b>{p.title}</b><time>{p.createdAt.slice(0, 10)}</time></Link></li>)}
+        {!posts.length && <li className="meta">게시글이 없습니다.</li>}
       </ul>
-    </>
+    </div></main>
   );
 }

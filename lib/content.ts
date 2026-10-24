@@ -6,6 +6,7 @@ export const CATEGORIES = {
   notice: '공고',
   bargaining: '임단협뉴스',
   letter: '지부장 서신',
+  newsletter: '뉴스레터',
   forms: '양식',
 } as const;
 export type Cat = keyof typeof CATEGORIES;

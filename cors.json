@@ -1,0 +1,1 @@
+[{ "origin": ["https://여기에-실제-도메인", "http://localhost:3000"], "method": ["PUT"], "responseHeader": ["Content-Type"], "maxAgeSeconds": 3600 }]

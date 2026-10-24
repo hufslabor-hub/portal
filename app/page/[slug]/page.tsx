@@ -1,4 +1,4 @@
-import Markdown from 'react-markdown';
+import Md from '@/components/Md';
 import { notFound } from 'next/navigation';
 import { getPage } from '@/lib/content';
 
@@ -9,5 +9,5 @@ export default async function StaticPage({ params }: { params: Promise<{ slug: s
   if (!/^[a-z0-9-]{1,40}$/.test(slug)) notFound();
   const page = await getPage(slug);
   if (!page) notFound();
-  return (<><h1>{page.title}</h1><div className="prose"><Markdown>{page.body}</Markdown></div></>);
+  return (<main><div className="wrap"><h1 className="pt">{page.title}</h1><div className="prose"><Md text={page.body} /></div></div></main>);
 }
