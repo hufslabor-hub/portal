@@ -4,6 +4,8 @@ import { getRole } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
+const APPLY_URL = 'https://script.google.com/a/macros/hufs.ac.kr/s/AKfycbzAXBPbje2UD12DwtYReu98ifbCo2-b-4DZx8hwVpF-iIVGNeAr3Fr47ZPufskVecQ/exec?page=apply';
+
 export default async function Home() {
   const role = await getRole(true);
   const keys: Cat[] = role ? ['notice', 'news', 'bargaining'] : ['notice'];
@@ -15,6 +17,7 @@ export default async function Home() {
         <h1>함께 일하는 사람들의<br /><em>목소리</em>, 한국외대 노동조합</h1>
         <p>공고와 교섭 소식을 가장 먼저 확인하세요.</p>
         <div className="btns">
+          <a className="btn" href={APPLY_URL} target="_blank" rel="noopener noreferrer">조합가입신청서</a>
           <a className="btn insta" href="https://www.instagram.com/hufs_labor_union/" target="_blank" rel="noopener noreferrer">인스타그램</a>
           <a className="btn kakao" href="https://pf.kakao.com/_Pxnjxkxj" rel="noopener noreferrer">카카오톡 채널</a>
         </div>

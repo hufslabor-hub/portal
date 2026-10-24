@@ -57,3 +57,11 @@ footer { background:var(--ink); color:rgba(255,255,255,.75); padding:28px 0 calc
 .dd a:hover { background:#d3d8e0; color:#14213d; }
 .mpanel .subl { padding:12px 4px 12px 22px; font-size:16px; font-weight:500; opacity:.88; }
 @media (min-width:820px) { .dnav { display:flex; } }
+/* 본문(옛 글 서식): 가운데/오른쪽 정렬, 들여쓰기, 내어쓰기(번호 항목) */
+.prose p { margin:.8em 0; } .prose .ta-center { text-align:center; } .prose .ta-right { text-align:right; }
+.prose .in1 { margin-left:1.6em; } .prose .in2 { margin-left:3.2em; } .prose .in3 { margin-left:4.8em; } .prose .in4 { margin-left:6.4em; }
+.prose p.li { display:flex; gap:.5em; margin:.35em 0; } .prose .mk { flex:none; min-width:1.4em; } .prose .tx { flex:1; min-width:0; }
+.prose ul, .prose ol { padding-left:1.4em; margin:.8em 0; } .prose li { margin:.25em 0; }
+.prose hr { border:0; border-top:1px solid var(--line); margin:24px 0; }
+.prose blockquote { margin:1em 0; padding:.2em 1em; border-left:4px solid var(--accent); background:var(--card); }
+.prose td, .prose th { white-space:normal; vertical-align:top; min-width:4em; } .prose th { text-align:center; }
