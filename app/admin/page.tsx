@@ -5,7 +5,7 @@ import { CATEGORIES } from '@/lib/content';
 import { logout } from './actions';
 
 export const dynamic = 'force-dynamic';
-const PAGES = [['greeting', '지부장 인사말'], ['about', '조합소개'], ['history', '조합 역사'], ['officers', '역대 임원진'], ['agreement', '단체협약'], ['bylaws', '규약'], ['rules', '지부규정']];
+const PAGES = [['greeting', '위원장 인사말'], ['about', '조합소개'], ['history', '조합 역사'], ['officers', '역대 임원진'], ['agreement', '단체협약'], ['bylaws', '규약'], ['rules', '지부규정']];
 
 export default async function Admin() {
   await requireAdmin();

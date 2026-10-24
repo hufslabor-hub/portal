@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Metadata, Viewport } from 'next';
 import { getRole } from '@/lib/auth';
 import { memberLogout } from './member-actions';
+import MobileMenu from '@/components/MobileMenu';
 
 export const metadata: Metadata = {
   title: { default: 'HUFS UNION - 한국외국어대학교 노동조합', template: '%s - HUFS UNION' },
@@ -18,13 +19,13 @@ const MENU: Menu[] = [
   { href: '/c/notice', name: '공고' },
   { href: '/c/news', name: '우리소식', lock: true, sub: [
     { href: '/c/bargaining', name: '임단협뉴스', lock: true },
-    { href: '/c/letter', name: '지부장 서신' },
+    { href: '/c/letter', name: '위원장 서신' },
     { href: '/c/newsletter', name: '뉴스레터' },
   ] },
   { href: '/page/agreement', name: '단체협약', lock: true },
   { href: '/page/bylaws', name: '규약', lock: true },
   { href: '/page/about', name: '조합소개', sub: [
-    { href: '/page/greeting', name: '지부장 인사말' },
+    { href: '/page/greeting', name: '위원장 인사말' },
     { href: '/page/history', name: '조합 역사' },
     { href: '/page/officers', name: '역대 임원진' },
     { href: '/page/rules', name: '지부규정' },
@@ -51,8 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {role === 'admin' && <div className="ni"><Link href="/admin">관리</Link></div>}
             <div className="ni">{role ? <form action={memberLogout}><button className="linkbtn">로그아웃</button></form> : <Link href="/login">로그인</Link>}</div>
           </nav>
-          <details className="m"><summary aria-label="메뉴">☰</summary>
-            <div className="mpanel">
+          <MobileMenu>
               {MENU.map((m) => (
                 <div key={m.href}>
                   <Link href={m.href}>{label(m)}</Link>
@@ -62,8 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <small>계정</small>
               {role === 'admin' && <Link href="/admin">관리자 화면</Link>}
               {role ? <form action={memberLogout}><button className="linkbtn" style={{ padding: '16px 4px', fontSize: 19 }}>로그아웃</button></form> : <Link href="/login">조합원 로그인</Link>}
-            </div>
-          </details>
+            </MobileMenu>
         </div></header>
         {children}
         <footer><div className="wrap">
