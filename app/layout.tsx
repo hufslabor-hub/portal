@@ -10,13 +10,31 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#14213d' };
 
-// [주소, 이름, 조합원 전용 여부]
-const MAIN: [string, string, boolean][] = [['/c/notice', '공고', false], ['/c/news', '우리소식', true], ['/c/bargaining', '임단협뉴스', true], ['/page/agreement', '단체협약', true], ['/page/bylaws', '규약', true]];
-const ABOUT = [['/page/greeting', '지부장 인사말'], ['/page/about', '조합소개'], ['/page/history', '조합 역사'], ['/page/officers', '역대 임원진'], ['/page/rules', '지부규정'], ['/c/letter', '지부장 서신'], ['/c/newsletter', '뉴스레터'], ['/c/forms', '양식']];
+type Item = { href: string; name: string; lock?: boolean };
+type Menu = Item & { sub?: Item[] };
+
+// 상위 메뉴와, 마우스를 올렸을 때 그 메뉴 아래에만 펼쳐지는 하위 메뉴
+const MENU: Menu[] = [
+  { href: '/c/notice', name: '공고' },
+  { href: '/c/news', name: '우리소식', lock: true, sub: [
+    { href: '/c/bargaining', name: '임단협뉴스', lock: true },
+    { href: '/c/letter', name: '지부장 서신' },
+    { href: '/c/newsletter', name: '뉴스레터' },
+  ] },
+  { href: '/page/agreement', name: '단체협약', lock: true },
+  { href: '/page/bylaws', name: '규약', lock: true },
+  { href: '/page/about', name: '조합소개', sub: [
+    { href: '/page/greeting', name: '지부장 인사말' },
+    { href: '/page/history', name: '조합 역사' },
+    { href: '/page/officers', name: '역대 임원진' },
+    { href: '/page/rules', name: '지부규정' },
+    { href: '/c/forms', name: '양식' },
+  ] },
+];
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const role = await getRole();
-  const label = (n: string, lock: boolean) => (lock && !role ? `${n} 🔒` : n);
+  const label = (i: Item) => (i.lock && !role ? `${i.name} 🔒` : i.name);
   return (
     <html lang="ko">
       <head><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" /></head>
@@ -24,26 +42,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="main"><div className="wrap">
           <Link href="/" className="logo">HUFS <b>UNION</b></Link>
           <nav className="dnav">
-            {MAIN.map(([h, n, l]) => <Link key={h} href={h}>{label(n, l)}</Link>)}
-            {role === 'admin' && <Link href="/admin">관리</Link>}
-            {role ? <form action={memberLogout}><button className="linkbtn">로그아웃</button></form> : <Link href="/login">로그인</Link>}
+            {MENU.map((m) => (
+              <div key={m.href} className="ni">
+                <Link href={m.href}>{label(m)}</Link>
+                {m.sub && <div className="dd">{m.sub.map((s) => <Link key={s.href} href={s.href}>{label(s)}</Link>)}</div>}
+              </div>
+            ))}
+            {role === 'admin' && <div className="ni"><Link href="/admin">관리</Link></div>}
+            <div className="ni">{role ? <form action={memberLogout}><button className="linkbtn">로그아웃</button></form> : <Link href="/login">로그인</Link>}</div>
           </nav>
           <details className="m"><summary aria-label="메뉴">☰</summary>
             <div className="mpanel">
-              {MAIN.map(([h, n, l]) => <Link key={h} href={h}>{label(n, l)}</Link>)}
-              <small>조합 안내</small>
-              {ABOUT.map(([h, n]) => <Link key={h} href={h}>{n}</Link>)}
+              {MENU.map((m) => (
+                <div key={m.href}>
+                  <Link href={m.href}>{label(m)}</Link>
+                  {m.sub?.map((s) => <Link key={s.href} href={s.href} className="subl">{label(s)}</Link>)}
+                </div>
+              ))}
               <small>계정</small>
               {role === 'admin' && <Link href="/admin">관리자 화면</Link>}
               {role ? <form action={memberLogout}><button className="linkbtn" style={{ padding: '16px 4px', fontSize: 19 }}>로그아웃</button></form> : <Link href="/login">조합원 로그인</Link>}
             </div>
           </details>
-        </div>
-        <div className="subnav"><div className="wrap">
-          <small>조합 안내</small>
-          {ABOUT.map(([h, n]) => <Link key={h} href={h}>{n}</Link>)}
-        </div></div>
-        </header>
+        </div></header>
         {children}
         <footer><div className="wrap">
           <b>한국외국어대학교 노동조합</b><br />
