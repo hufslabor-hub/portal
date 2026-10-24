@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import { CATEGORIES, getPosts, type Cat } from '@/lib/content';
+import { getRole } from '@/lib/auth';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const keys: Cat[] = ['notice', 'news', 'bargaining'];
+  const role = await getRole(true);
+  const keys: Cat[] = role ? ['notice', 'news', 'bargaining'] : ['notice'];
   const lists = await Promise.all(keys.map((k) => getPosts(k, 4)));
+  const lock = role ? '' : ' 🔒';
   return (
     <>
       <section className="hero"><div className="wrap">
@@ -18,7 +21,8 @@ export default async function Home() {
       </div></section>
       <main><div className="wrap">
         <div className="quick">
-          {[['/page/agreement', '단체협약'], ['/page/bylaws', '규약'], ['/c/forms', '양식'], ['/page/about', '조합소개']].map(([h, n]) => <Link key={h} href={h}>{n}</Link>)}
+          <Link href="/page/agreement">단체협약{lock}</Link><Link href="/page/bylaws">규약{lock}</Link>
+          <Link href="/c/forms">양식</Link><Link href="/page/about">조합소개</Link>
         </div>
         {keys.map((k, i) => (
           <section key={k}>
@@ -28,6 +32,12 @@ export default async function Home() {
             </ul>
           </section>
         ))}
+        {!role && (
+          <section>
+            <h2 className="sec">조합원 전용</h2>
+            <ul className="cards"><li><Link href="/login"><b>🔒 로그인하고 우리소식 · 임단협뉴스 · 단체협약 · 규약 보기</b><time>조합원 로그인 / 가입 신청</time></Link></li></ul>
+          </section>
+        )}
       </div></main>
     </>
   );

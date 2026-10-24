@@ -43,3 +43,7 @@ export async function getPage(slug: string): Promise<{ title: string; body: stri
   const d = await db().collection('pages').doc(slug).get();
   return d.exists ? { title: d.data()!.title, body: d.data()!.body ?? '' } : null;
 }
+
+// 로그인한 조합원(또는 관리자)만 볼 수 있는 항목
+export const PROTECTED_CATS: Cat[] = ['news', 'bargaining'];
+export const PROTECTED_PAGES = ['agreement', 'bylaws'];

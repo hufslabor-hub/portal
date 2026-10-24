@@ -13,7 +13,7 @@ export default async function Admin() {
   return (
     <main><div className="wrap">
       <div className="bar"><h1 className="pt">관리자</h1><form action={logout}><button className="btn ghost sm">로그아웃</button></form></div>
-      <Link className="btn" href="/admin/post/new">+ 새 글 쓰기</Link>
+      <div className="btns"><Link className="btn" href="/admin/post/new">+ 새 글 쓰기</Link><Link className="btn ghost" href="/admin/members">조합원 관리</Link></div>
       <h2 className="sec">게시글</h2>
       <ul className="cards">
         {s.docs.map((d) => { const v = d.data(); return (

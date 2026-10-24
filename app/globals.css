@@ -37,3 +37,5 @@ footer { background:var(--ink); color:rgba(255,255,255,.75); padding:28px 0 calc
 .form .btn { border:0; cursor:pointer; justify-content:center; font:inherit; font-weight:700; }
 .btn.sm { min-height:40px; padding:0 16px; } .btn.danger { background:#d64545; color:#fff; } .btn.ghost { color:var(--fg); border-color:var(--line); }
 .err { color:#d64545; margin:0; } .wrapchips { flex-wrap:wrap; overflow:visible; margin:0; padding:0; }
+.ok { color:#1f9d55; margin:0; } .linkbtn { background:none; border:0; color:inherit; font:inherit; font-weight:600; cursor:pointer; padding:0; } .linkbtn:hover { color:var(--accent); }
+.mrow { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; padding:14px 18px; background:var(--card); border:1px solid var(--line); border-radius:var(--r); } .mrow .btns { display:flex; gap:8px; } .mrow .meta { white-space:normal; }

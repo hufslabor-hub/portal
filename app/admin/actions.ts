@@ -70,3 +70,23 @@ export async function savePage(fd: FormData) {
   revalidatePath('/', 'layout');
   redirect('/admin');
 }
+
+// ── 조합원 승인/해제/삭제 ──
+export async function setMember(fd: FormData) {
+  await requireAdmin();
+  const uid = text(fd, 'uid', 128), on = fd.get('on') === '1';
+  const u = await adminAuth().getUser(uid);
+  if (u.customClaims?.admin) throw new Error('관리자 계정은 여기서 바꿀 수 없습니다.');
+  await adminAuth().setCustomUserClaims(uid, { ...(u.customClaims ?? {}), member: on });
+  if (!on) await adminAuth().revokeRefreshTokens(uid); // 이미 로그인한 세션도 즉시 무효화
+  revalidatePath('/admin/members');
+}
+
+export async function deleteUser(fd: FormData) {
+  await requireAdmin();
+  const uid = text(fd, 'uid', 128);
+  const u = await adminAuth().getUser(uid);
+  if (u.customClaims?.admin) throw new Error('관리자 계정은 삭제할 수 없습니다.');
+  await adminAuth().deleteUser(uid);
+  revalidatePath('/admin/members');
+}
