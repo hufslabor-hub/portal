@@ -3,14 +3,18 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 
 const OK_EXT = ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'docx', 'xlsx', 'pptx', 'hwp', 'hwpx', 'zip'];
+const envEnding = (suffix: string) =>
+  Object.entries(process.env).find(([k, v]) => k.endsWith(suffix) && v)?.[1];
 
-// 관리자만 업로드 토큰을 받을 수 있음. 파일은 브라우저에서 Blob으로 직접 올라감(4.5MB 제한 없음).
 export async function POST(request: Request) {
   const body = (await request.json()) as HandleUploadBody;
+  const token = envEnding('READ_WRITE_TOKEN');
+  const storeId = envEnding('STORE_ID');
   try {
     const json = await handleUpload({
       body, request,
-      token: process.env.hufslabor_READ_WRITE_TOKEN ?? process.env.BLOB_READ_WRITE_TOKEN,
+      ...(token ? { token } : {}),
+      ...(storeId ? { storeId } : {}),
       onBeforeGenerateToken: async (pathname) => {
         await requireAdmin();
         const ext = pathname.split('.').pop()?.toLowerCase() ?? '';
@@ -21,6 +25,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(json);
   } catch (e) {
+    console.error('upload token error', e);
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
