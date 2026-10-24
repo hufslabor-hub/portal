@@ -25,7 +25,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Link href="/" className="logo">HUFS <b>UNION</b></Link>
           <nav className="dnav">
             {MAIN.map(([h, n, l]) => <Link key={h} href={h}>{label(n, l)}</Link>)}
-            <Link href="/page/about">조합소개</Link>
             {role === 'admin' && <Link href="/admin">관리</Link>}
             {role ? <form action={memberLogout}><button className="linkbtn">로그아웃</button></form> : <Link href="/login">로그인</Link>}
           </nav>
@@ -39,7 +38,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {role ? <form action={memberLogout}><button className="linkbtn" style={{ padding: '16px 4px', fontSize: 19 }}>로그아웃</button></form> : <Link href="/login">조합원 로그인</Link>}
             </div>
           </details>
-        </div></header>
+        </div>
+        <div className="subnav"><div className="wrap">
+          <small>조합 안내</small>
+          {ABOUT.map(([h, n]) => <Link key={h} href={h}>{n}</Link>)}
+        </div></div>
+        </header>
         {children}
         <footer><div className="wrap">
           <b>한국외국어대학교 노동조합</b><br />
