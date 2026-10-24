@@ -45,7 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <b>한국외국어대학교 노동조합</b><br />
           서울캠퍼스 본관 602호 · <a href="tel:0221732611">02-2173-2611</a><br />
           글로벌캠퍼스 백년관 922호<br />
-          <a href="mailto:hufslabor@hufs.ac.kr">hufslabor@hufs.ac.kr</a> · <a href="https://pf.kakao.com/_Pxnjxkxj" rel="noopener noreferrer">카카오 채널</a>
+          <a href="mailto:hufslabor@hufs.ac.kr">hufslabor@hufs.ac.kr</a> · <a href="https://pf.kakao.com/_Pxnjxkxj" rel="noopener noreferrer">카카오 채널</a> · <a href="https://www.instagram.com/hufs_labor_union/" target="_blank" rel="noopener noreferrer">인스타그램</a>
         </div></footer>
       </body>
     </html>
