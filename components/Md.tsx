@@ -11,8 +11,10 @@ const schema = {
   tagNames: [...(defaultSchema.tagNames ?? []), 'u', 'span'],
   attributes: {
     ...A,
-    p: [['className', 'ta-center', 'ta-right', 'in1', 'in2', 'in3', 'in4', 'li']],
-    span: [['className', 'mk', 'tx']],
+    p: [['className', 'ta-center', 'ta-right', 'in1', 'in2', 'in3', 'in4', 'li', 'lead', 'sub', 'note']],
+    span: [['className', 't', 'd', 'mk', 'tx']],
+    h2: [['className', 'sec', 'top']],
+    h3: [['className', 'era']],
     td: [...(A.td ?? []), 'colSpan', 'rowSpan'],
     th: [...(A.th ?? []), 'colSpan', 'rowSpan'],
   },

@@ -15,7 +15,7 @@ def inline(nodes, wp, seen):
     for c in nodes:
         if isinstance(c, Comment): continue
         if isinstance(c, NavigableString):
-            out.append(re.sub('[\ue000-\uf8ff\U000f0000-\U0010ffff]', '', html.escape(str(c).replace('\xa0', ' '), quote=False))); continue
+            out.append(html.escape(str(c).replace('\xa0', ' '), quote=False)); continue
         n = c.name
         if n in ('script', 'style', 'iframe', 'form', 'noscript'): continue
         if n == 'br': out.append('<br>'); continue
@@ -43,7 +43,12 @@ def make_p(s, wp, style='', cls=(), raw=False):
     s = re.sub(r'[ \t]*\n[ \t]*', ' ' if wp else '<br>', s)
     s = re.sub(r'[ \t]+', ' ', s)
     if not s or (not re.sub(r'<[^>]+>|\s', '', s) and '<img' not in s): return None
+    lead = re.match(r'^(?:<[^>]+>|\s)*' + PUA, s) is not None   # 한글 문서 머리표('')로 시작 = 큰 제목
+    s = re.sub(r'[ \t]+', ' ', re.sub(PUA, '', s)).strip()
+    if not re.sub(r'<[^>]+>|\s', '', s) and '<img' not in s: return None
     if raw: return s
+    if h := heading_of(html.unescape(re.sub(r'<[^>]+>', '', s))): return h
+    if lead: return '<h2 class="sec">' + re.sub(r'</?(?:strong|u|em)>', '', s).strip() + '</h2>'
     classes = []
     align = re.search(r'text-align:\s*(center|right)', style) or re.search(r'has-text-align-(center|right)', ' '.join(cls))
     if align: classes.append('ta-' + align.group(1))
@@ -78,19 +83,41 @@ def table(t, wp):
         if cs: rows.append('<tr>' + ''.join(cs) + '</tr>')
     return '<table><tbody>' + ''.join(rows) + '</tbody></table>' if rows else ''
 
+PUA = '[\ue000-\uf8ff\U000f0000-\U0010ffff]'
+ERA = re.compile(r'^(?:\d+\)\s*)?(제\s*\d+\s*대\s*노동조합)\s*[\(（]\s*(.+?)\s*[\)）]\s*$')
+CHAPTER = re.compile(r'^제\s*\d+\s*[장절](?:\s|\(|（).{0,50}$')
+
+def heading_of(plain):
+    """제N대 노동조합(기간) → 연혁 제목, 제N장 ... → 큰 제목. 해당 없으면 None."""
+    t = re.sub(r'\s+', ' ', re.sub(PUA, '', plain)).strip()
+    m = ERA.match(t)
+    if m:
+        name = re.sub(r'제\s*(\d+)\s*대\s*노동조합', r'제\1대 노동조합', m.group(1))
+        period = re.sub(r'\s*[~～∼〜]\s*', ' ~ ', m.group(2)).strip()
+        return f'<h3 class="era"><span class="t">{html.escape(name)}</span><span class="d">{html.escape(period)}</span></h3>'
+    if CHAPTER.match(t) and not t.endswith(('.', '다')):
+        return f'<h2 class="sec">{html.escape(t)}</h2>'
+    return None
+
 def lst(t, wp):
-    items = []
+    """목록을 만들되, 목록 항목 한 줄짜리 '제N대 노동조합(기간)' 같은 제목은 제목으로 분리."""
+    out, cur = [], []
+    def flush():
+        if cur: out.append(f'<{t.name}>' + ''.join(cur) + f'</{t.name}>'); cur.clear()
     for li in t.find_all('li', recursive=False):
+        h = heading_of(li.get_text())
+        if h: flush(); out.append(h); continue
         txt = inline([c for c in li.children if not (isinstance(c, Tag) and c.name in ('ul', 'ol'))], wp, set())
         txt = make_p(txt, wp, raw=True) or ''
-        sub = ''.join(lst(c, wp) for c in li.children if isinstance(c, Tag) and c.name in ('ul', 'ol'))
-        items.append(f'<li>{txt}{sub}</li>')
-    return f'<{t.name}>' + ''.join(items) + f'</{t.name}>' if items else ''
+        sub = ''.join(''.join(lst(c, wp)) for c in li.children if isinstance(c, Tag) and c.name in ('ul', 'ol'))
+        cur.append(f'<li>{txt}{sub}</li>')
+    flush()
+    return out
 
 def handle(t, wp):
     n = t.name
     if n == 'hr': return ['<hr>']
-    if n in ('ul', 'ol'): return [x] if (x := lst(t, wp)) else []
+    if n in ('ul', 'ol'): return lst(t, wp)
     if n == 'table': return [x] if (x := table(t, wp)) else []
     if re.fullmatch(r'h[1-6]', n):
         h = 'h2' if n in ('h1', 'h2') else 'h3'
@@ -100,6 +127,11 @@ def handle(t, wp):
         return ['<blockquote>' + ''.join(blocks(t.children, wp)) + '</blockquote>']
     if any(isinstance(c, Tag) and c.name in BLOCK for c in t.children):
         return blocks(t.children, wp)
+    plain = t.get_text()
+    if h := heading_of(plain): return [h]
+    if re.match(r'\s*' + PUA, plain):                      # 한글 문서의 '' 같은 머리표로 시작하는 줄 = 큰 제목
+        txt = make_p(inline(t.children, wp, set()), wp, raw=True)
+        return [f'<h2 class="sec">{re.sub(r"</?strong>", "", txt)}</h2>'] if txt else []
     p = make_p(inline(t.children, wp, set()), wp, t.get('style', ''), t.get('class') or [])
     return [p] if p else []
 
@@ -121,7 +153,24 @@ def blocks(children, wp):
 def convert(raw):
     wp = '<!-- wp:' in raw                                # 블록 에디터 글은 줄바꿈이 공백, 클래식 글은 줄바꿈이 <br>
     soup = BeautifulSoup(raw, 'html.parser')
-    return '\n\n'.join(blocks(soup.children, wp))
+    out = blocks(soup.children, wp)
+    for i in range(1, len(out)):                          # 제목 바로 아래 굵은 한 줄 → 부제
+        if out[i - 1].startswith('<h3 class="era"') and re.fullmatch(r'<p>(?:<strong>.*?</strong>\s*)+</p>', out[i], re.S):
+            inner = re.sub(r'</?strong>', '', out[i])[3:-4].strip()
+            if len(re.sub(r'<[^>]+>', '', inner)) <= 120:
+                out[i] = '<p class="lead">' + re.sub(r'^[:：]\s*', '', inner) + '</p>'
+    return '\n\n'.join(out)
+
+NOTE = '<p class="note">※ 2025년 12월 11일까지의 공식 명칭은 전국대학노동조합 한국외국어대학교지부이며, 현재 공식 명칭은 한국외국어대학교 노동조합입니다.</p>'
+H_P1 = '<p><strong>전국대학노동조합 한국외국어대학교지부 역 사</strong></p>'
+H_P2 = '<p><strong>(1987-2021. </strong><strong>현재까지</strong><strong>)</strong></p>'
+
+def finish(slug, body):
+    """현재 공식 명칭 반영(과거 문서 본문은 그대로 두고, 머리말과 안내만 수정)."""
+    if slug == 'history' and H_P1 in body and H_P2 in body:
+        body = body.replace(H_P1, '<h2 class="sec top">한국외국어대학교 노동조합 역사</h2>').replace(H_P2, '<p class="sub">(1987-2021. 현재까지)</p>\n\n' + NOTE)
+    if slug == 'about': body = NOTE + '\n\n' + body
+    return body
 
 def field(it, tag):
     m = re.search(rf'<{tag}>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</{tag}>', it, re.S)
@@ -133,7 +182,9 @@ if __name__ == '__main__':
         if field(it, 'wp:status') != 'publish': continue
         typ, pid, title = field(it, 'wp:post_type'), int(field(it, 'wp:post_id')), field(it, 'title')
         body = convert(re.search(r'<content:encoded><!\[CDATA\[(.*?)\]\]>', it, re.S).group(1))
-        if typ == 'page' and pid in PAGES: pages[PAGES[pid]] = {'title': title, 'body': body}
+        if typ == 'page' and pid in PAGES:
+            slug = PAGES[pid]
+            pages[slug] = {'title': '위원장 인사말' if slug == 'greeting' else title, 'body': finish(slug, body)}
         elif typ == 'post':
             cats = [CAT[c] for c in re.findall(r'<category domain="category"[^>]*><!\[CDATA\[(.*?)\]\]>', it) if c in CAT]
             posts.append({'id': f'wp{pid}', 'title': title, 'category': cats[0] if cats else 'news', 'body': body,

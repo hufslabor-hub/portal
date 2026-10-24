@@ -65,3 +65,13 @@ footer { background:var(--ink); color:rgba(255,255,255,.75); padding:28px 0 calc
 .prose hr { border:0; border-top:1px solid var(--line); margin:24px 0; }
 .prose blockquote { margin:1em 0; padding:.2em 1em; border-left:4px solid var(--accent); background:var(--card); }
 .prose td, .prose th { white-space:normal; vertical-align:top; min-width:4em; } .prose th { text-align:center; }
+/* 연혁/규약 제목 */
+.prose p { line-height:1.85; }
+.prose h2.sec { font-size:22px; line-height:1.4; margin:48px 0 14px; padding-bottom:10px; border-bottom:2px solid var(--accent); }
+.prose h2.sec.top { text-align:center; border:0; font-size:27px; margin:8px 0 4px; padding:0; }
+.prose p.sub { text-align:center; color:var(--mute); margin:0 0 16px; }
+.prose p.note { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 16px; font-size:15px; color:var(--mute); }
+.prose h3 { font-size:18px; line-height:1.4; margin:28px 0 8px; }
+.prose h3.era { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 14px; margin:44px 0 12px; padding:12px 16px; background:var(--card); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:0 14px 14px 0; font-size:20px; }
+.prose h3.era .d { font-size:14px; font-weight:500; color:var(--mute); }
+.prose p.lead { font-weight:700; margin:6px 0 14px; padding-left:12px; border-left:3px solid var(--line); }
