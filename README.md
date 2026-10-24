@@ -18,8 +18,9 @@ Next.js + Firestore(Admin SDK) + Vercel.
 3. `node --env-file=.env.local scripts/make-admin.mjs 관리자이메일`
 4. `/admin` 접속
 
-## 첨부파일 (Firebase Storage)
-1. 콘솔에서 Storage를 시작하고(Blaze 요금제 필요), 버킷 이름을 `FIREBASE_STORAGE_BUCKET`에 입력 (Vercel에도 등록)
-2. `cors.json`의 도메인을 고친 뒤 `gcloud storage buckets update gs://버킷이름 --cors-file=cors.json`
-3. 기존 파일 이전: `node --env-file=.env.local scripts/migrate_files.mjs seed.json seed.migrated.json` → `node --env-file=.env.local scripts/seed.mjs seed.migrated.json`
+## 첨부파일 (Vercel Blob)
+1. Vercel → Storage에서 Blob 저장소(Public)를 만들고 프로젝트에 연결
+2. `npm install @vercel/blob`
+3. 저장소 화면의 `.env.local` 탭 값을 `.env.local`에 복사 (Vercel 프로젝트에는 자동 등록됨)
+4. 기존 파일 이전: `node --env-file=.env.local scripts/migrate_files.mjs seed.json seed.migrated.json` → `node --env-file=.env.local scripts/seed.mjs seed.migrated.json`
 - 업로드된 파일은 주소를 아는 누구나 열 수 있습니다. 비공개 문서는 올리지 마세요.

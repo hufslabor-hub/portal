@@ -4,7 +4,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
   "font-src 'self' https://cdn.jsdelivr.net",
   "script-src 'self' 'unsafe-inline'",
-  "connect-src 'self' https://storage.googleapis.com",
+  "connect-src 'self' https://vercel.com https://*.blob.vercel-storage.com",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

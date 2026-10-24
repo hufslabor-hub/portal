@@ -3,8 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { FieldValue } from 'firebase-admin/firestore';
-import { randomUUID } from 'node:crypto';
-import { adminAuth, bucket, db } from '@/lib/firebase';
+import { adminAuth, db } from '@/lib/firebase';
 import { requireAdmin, SESSION, SESSION_SEC } from '@/lib/auth';
 import { CATEGORIES, isCat } from '@/lib/content';
 
@@ -70,32 +69,4 @@ export async function savePage(fd: FormData) {
   await db().collection('pages').doc(slug).set({ title: text(fd, 'title', 200), body: text(fd, 'body', 200000), updatedAt: FieldValue.serverTimestamp() }, { merge: true });
   revalidatePath('/', 'layout');
   redirect('/admin');
-}
-
-// ── 첨부파일 업로드: 브라우저가 Storage로 직접 올리도록 10분짜리 서명 URL을 발급 ──
-const EXT: Record<string, string> = {
-  pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp',
-  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  hwp: 'application/x-hwp', hwpx: 'application/x-hwpx', zip: 'application/zip',
-};
-const MAX_BYTES = 30 * 1024 * 1024;
-
-export async function getUploadUrl(fileName: string, size: number) {
-  await requireAdmin();
-  const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
-  if (!(ext in EXT)) throw new Error('허용되지 않는 파일 형식입니다.');
-  if (!(size > 0 && size <= MAX_BYTES)) throw new Error('파일은 30MB 이하만 올릴 수 있습니다.');
-  const path = `uploads/${randomUUID()}.${ext}`;
-  const [url] = await bucket().file(path).getSignedUrl({ version: 'v4', action: 'write', expires: Date.now() + 10 * 60 * 1000, contentType: EXT[ext] });
-  return { url, path, contentType: EXT[ext] };
-}
-
-export async function finalizeUpload(path: string) {
-  await requireAdmin();
-  if (!/^uploads\/[0-9a-f-]{36}\.[a-z0-9]{2,5}$/.test(path)) throw new Error('잘못된 요청');
-  const f = bucket().file(path);
-  await f.makePublic();
-  return `https://storage.googleapis.com/${bucket().name}/${path}`;
 }

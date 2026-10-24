@@ -1,12 +1,11 @@
-// 기존 사이트의 첨부(PDF·이미지)를 Firebase Storage로 옮기고 seed.json의 주소를 새 주소로 바꿉니다.
+// 기존 사이트의 첨부(PDF·이미지)를 Vercel Blob으로 옮기고 seed.json의 주소를 새 주소로 바꿉니다.
 // 사용: node --env-file=.env.local scripts/migrate_files.mjs seed.json seed.migrated.json
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { cert, initializeApp } from 'firebase-admin/app';
-import { getStorage } from 'firebase-admin/storage';
+import { put } from '@vercel/blob';
 
-initializeApp({ credential: cert({ projectId: process.env.FIREBASE_PROJECT_ID, clientEmail: process.env.FIREBASE_CLIENT_EMAIL, privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n') }) });
-const bucket = getStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET);
+const storeId = process.env.hufslabor_STORE_ID;
+const token = process.env.hufslabor_READ_WRITE_TOKEN ?? process.env.BLOB_READ_WRITE_TOKEN;
 let text = readFileSync(process.argv[2], 'utf8');
 const urls = [...new Set(text.match(/https:\/\/hufslabor\.mycafe24\.com\/wp-content\/uploads\/[^\s)"'<>\]\\]+/g) ?? [])];
 console.log(`옮길 파일 ${urls.length}개`);
@@ -17,10 +16,11 @@ for (const u of urls) {
     if (!res.ok) throw new Error(res.status);
     const ext = (u.split('?')[0].split('.').pop() ?? 'bin').toLowerCase().slice(0, 5);
     const path = `wp/${createHash('sha1').update(u).digest('hex').slice(0, 16)}.${ext}`;
-    const f = bucket.file(path);
-    await f.save(Buffer.from(await res.arrayBuffer()), { contentType: res.headers.get('content-type') ?? undefined });
-    await f.makePublic();
-    text = text.split(u).join(`https://storage.googleapis.com/${bucket.name}/${path}`);
+    const { url } = await put(path, Buffer.from(await res.arrayBuffer()), {
+      access: 'public', storeId, token, addRandomSuffix: false, allowOverwrite: true,
+      contentType: res.headers.get('content-type') ?? undefined,
+    });
+    text = text.split(u).join(url);
     ok++;
   } catch (e) { console.warn('실패:', u, String(e)); }
 }

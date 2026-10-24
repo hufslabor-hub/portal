@@ -2,7 +2,6 @@ import 'server-only';
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
 
 function init() {
   if (!getApps().length) {
@@ -17,4 +16,3 @@ function init() {
 }
 export const db = () => { init(); return getFirestore(); };
 export const adminAuth = () => { init(); return getAuth(); };
-export const bucket = () => { init(); return getStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET); };
