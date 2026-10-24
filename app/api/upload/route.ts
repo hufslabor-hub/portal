@@ -9,11 +9,11 @@ const envEnding = (suffix: string) =>
 export async function POST(request: Request) {
   const body = (await request.json()) as HandleUploadBody;
   const token = envEnding('READ_WRITE_TOKEN');
-  const storeId = envEnding('STORE_ID');
+   const storeId = Object.entries(process.env).find(([k, v]) => k.endsWith('STORE_ID') && v)?.[1];
+  if (storeId) process.env.BLOB_STORE_ID = storeId;
   try {
     const json = await handleUpload({
       body, request,
-      ...(token ? { token } : {}),
       ...(storeId ? { storeId } : {}),
       onBeforeGenerateToken: async (pathname) => {
         await requireAdmin();
