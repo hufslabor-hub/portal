@@ -38,3 +38,12 @@ export async function signup(_p: { ok: boolean; msg: string } | null, fd: FormDa
   await adminAuth().updateUser(localId, { displayName: dept ? `${name} (${dept})` : name });
   return { ok: true, msg: '가입 신청이 접수되었습니다. 조합 사무실의 승인 후 로그인할 수 있습니다.' };
 }
+
+// 비밀번호 재설정 메일 발송. 가입 여부가 드러나지 않도록 결과 문구는 항상 같음.
+export async function resetPassword(_p: { ok: boolean; msg: string } | null, fd: FormData): Promise<{ ok: boolean; msg: string }> {
+  const done = { ok: true, msg: '해당 주소로 가입된 계정이 있으면 비밀번호 재설정 메일을 보냈습니다. 메일함(스팸함 포함)을 확인해 주세요.' };
+  if (f(fd, 'website', 100)) return done;
+  const email = f(fd, 'email', 200);
+  if (email) await idt('sendOobCode', { requestType: 'PASSWORD_RESET', email }).catch(() => {});
+  return done;
+}
