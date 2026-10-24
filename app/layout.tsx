@@ -5,9 +5,19 @@ import { getRole } from '@/lib/auth';
 import { memberLogout } from './member-actions';
 import MobileMenu from '@/components/MobileMenu';
 
+const SITE = process.env.NEXT_PUBLIC_SITE_URL
+  ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000');
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE),
   title: { default: 'HUFS UNION - 한국외국어대학교 노동조합', template: '%s - HUFS UNION' },
   description: '한국외국어대학교 노동조합 공식 홈페이지',
+  openGraph: {
+    title: '한국외국어대학교 노동조합',
+    description: '공고와 교섭 소식을 가장 먼저 확인하세요.',
+    siteName: 'HUFS UNION', locale: 'ko_KR', type: 'website',
+    images: [{ url: '/og.png', width: 1200, height: 630, alt: '한국외국어대학교 노동조합' }],
+  },
 };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#14213d' };
 

@@ -1,10 +1,12 @@
 'use client';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { signup } from '../member-actions';
 
 export default function Signup() {
   const [res, act, pending] = useActionState(signup, null);
+  const msgRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (res) msgRef.current?.focus(); }, [res]);
   return (
     <main><div className="wrap narrow">
       <h1 className="pt">가입 신청</h1>
@@ -15,7 +17,7 @@ export default function Signup() {
         <label>이메일<input name="email" type="email" autoComplete="username" required /></label>
         <label>비밀번호 (8자 이상)<input name="password" type="password" autoComplete="new-password" minLength={8} required /></label>
         <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px' }} />
-        {res && <p className={res.ok ? 'ok' : 'err'} role="alert">{res.msg}</p>}
+        {res && <p ref={msgRef} tabIndex={-1} className={res.ok ? 'ok' : 'err'} role="alert">{res.msg}</p>}
         <button className="btn" disabled={pending}>{pending ? '접수 중…' : '가입 신청'}</button>
         <p className="meta"><Link href="/login">로그인으로 돌아가기</Link></p>
       </form>

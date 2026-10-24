@@ -3,13 +3,18 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { FieldValue } from 'firebase-admin/firestore';
+import { del } from '@vercel/blob';
 import { adminAuth, db } from '@/lib/firebase';
+import { blobToken } from '@/lib/blob';
+import { limit } from '@/lib/ratelimit';
+import { extOf } from '@/lib/upload-rules';
 import { requireAdmin, SESSION, SESSION_SEC } from '@/lib/auth';
 import { CATEGORIES, isCat } from '@/lib/content';
 
 export async function login(_prev: string | null, fd: FormData): Promise<string | null> {
   const email = String(fd.get('email') ?? '').slice(0, 200);
   const password = String(fd.get('password') ?? '').slice(0, 200);
+  if (!(await limit('login', email.toLowerCase(), 10, 900))) return '시도가 너무 많습니다. 15분 뒤에 다시 시도해 주세요.';
   const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_WEB_API_KEY}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, returnSecureToken: true }),
@@ -19,7 +24,7 @@ export async function login(_prev: string | null, fd: FormData): Promise<string 
   const dec = await adminAuth().verifyIdToken(idToken);
   if (dec.admin !== true) return '관리자 권한이 없는 계정입니다.';
   const cookie = await adminAuth().createSessionCookie(idToken, { expiresIn: SESSION_SEC * 1000 });
-  (await cookies()).set(SESSION, cookie, { httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: SESSION_SEC });
+  (await cookies()).set(SESSION, cookie, { httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: SESSION_SEC });
   redirect('/admin');
 }
 
@@ -89,4 +94,35 @@ export async function deleteUser(fd: FormData) {
   if (u.customClaims?.admin) throw new Error('관리자 계정은 삭제할 수 없습니다.');
   await adminAuth().deleteUser(uid);
   revalidatePath('/admin/members');
+}
+
+// ── 업로드된 파일 검사: 앞 16바이트(파일 시그니처)가 확장자와 맞지 않으면 즉시 삭제 ──
+const starts = (b: Uint8Array, sig: number[]) => sig.every((v, i) => b[i] === v);
+function signatureOk(ext: string, b: Uint8Array) {
+  switch (ext) {
+    case 'pdf': return starts(b, [0x25, 0x50, 0x44, 0x46, 0x2d]);
+    case 'png': return starts(b, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    case 'jpg': case 'jpeg': return starts(b, [0xff, 0xd8, 0xff]);
+    case 'gif': return starts(b, [0x47, 0x49, 0x46, 0x38]);
+    case 'webp': return starts(b, [0x52, 0x49, 0x46, 0x46]) && starts(b.slice(8), [0x57, 0x45, 0x42, 0x50]);
+    case 'docx': case 'xlsx': case 'pptx': case 'hwpx': return starts(b, [0x50, 0x4b, 0x03, 0x04]);
+    case 'hwp': return starts(b, [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]) || starts(b, [0x48, 0x57, 0x50, 0x20]);
+    default: return false;
+  }
+}
+
+export async function verifyUpload(url: string): Promise<boolean> {
+  await requireAdmin();
+  let u: URL;
+  try { u = new URL(url); } catch { throw new Error('잘못된 주소입니다.'); }
+  // 우리 Blob 저장소의 uploads/ 경로만 검사(임의 주소 요청 방지)
+  if (u.protocol !== 'https:' || !u.hostname.endsWith('.blob.vercel-storage.com') || !u.pathname.startsWith('/uploads/')) throw new Error('잘못된 주소입니다.');
+  const res = await fetch(url, { headers: { Range: 'bytes=0-15' } });
+  const head = new Uint8Array(await res.arrayBuffer()).slice(0, 16);
+  if (!res.ok || !signatureOk(extOf(u.pathname), head)) {
+    const token = blobToken();
+    await del(url, token ? { token } : undefined).catch(() => {});
+    throw new Error('파일 내용이 확장자와 맞지 않아 삭제했습니다.');
+  }
+  return true;
 }
