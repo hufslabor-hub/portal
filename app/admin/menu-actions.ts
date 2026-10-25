@@ -1,7 +1,7 @@
 'use server';
 import { randomBytes } from 'node:crypto';
 import { redirect } from 'next/navigation';
-import { revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { db } from '@/lib/firebase';
 import { requireAdmin } from '@/lib/auth';
 import { DEFAULT_MENU, type MenuItem } from '@/lib/menu-data';
@@ -28,6 +28,7 @@ async function mutate(fn: (items: MenuItem[]) => void) {
     tx.set(ref, { items });
   });
   revalidateTag('menu');
+  revalidatePath('/', 'layout'); // 모든 페이지의 상단 메뉴를 새로 그리도록
 }
 
 export async function menuSave(fd: FormData) {
@@ -47,14 +48,14 @@ export async function menuSave(fd: FormData) {
       items.push({ id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), false) });
     }
   });
-  redirect('/admin/menu');
+  redirect('/admin/menu?ok=1');
 }
 
 export async function menuDelete(fd: FormData) {
   await requireAdmin();
   const id = t(fd, 'id', 20);
   await mutate((items) => { const loc = locate(items, id); if (loc) loc.arr.splice(loc.i, 1); });
-  redirect('/admin/menu');
+  redirect('/admin/menu?ok=1');
 }
 
 export async function menuMove(fd: FormData) {
@@ -65,12 +66,13 @@ export async function menuMove(fd: FormData) {
     const j = loc.i + d; if (j < 0 || j >= loc.arr.length) return;
     [loc.arr[loc.i], loc.arr[j]] = [loc.arr[j], loc.arr[loc.i]];
   });
-  redirect('/admin/menu');
+  redirect('/admin/menu?ok=1');
 }
 
 export async function menuReset() {
   await requireAdmin();
   await db().collection('settings').doc('menu').delete();
   revalidateTag('menu');
-  redirect('/admin/menu');
+  revalidatePath('/', 'layout');
+  redirect('/admin/menu?ok=1');
 }

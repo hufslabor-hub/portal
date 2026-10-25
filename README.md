@@ -27,6 +27,6 @@ Next.js + Firestore(Admin SDK) + Vercel.
 
 ## 조합원 기능 (메뉴 관리 · 조합원 찾기 · 자유게시판 · 그룹챗)
 - 관리자 화면 → **메뉴 관리**에서 상위/하위 메뉴를 추가·수정·삭제·순서 변경
-- 이미 승인된 조합원을 '조합원 찾기' 목록에 넣기: `node --env-file=.env.local scripts/sync_members.mjs` (이후 승인하는 사람은 자동 등록)
+- 조합원 찾기: 구글 스프레드시트 '조합원(전체)' 시트의 이름·소속을 Apps Script 웹 앱(`scripts/apps-script-members-api.gs`)으로 받아옴. Vercel 환경변수 `MEMBERS_API_URL`, `MEMBERS_API_KEY` 필요
 - 자유게시판 작성자 표식용 비밀 키: 환경변수 `ANON_SECRET`(임의의 긴 문자열)을 Vercel에 등록 권장. 없으면 Firebase 비공개 키를 대신 사용
 - 오래된 기록 자동 삭제: Firestore TTL 정책을 `chat_messages`, `ratelimits` 컬렉션의 `expireAt` 필드에 설정(선택)

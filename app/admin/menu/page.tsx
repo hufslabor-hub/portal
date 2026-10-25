@@ -25,13 +25,15 @@ function Row({ it, sub }: { it: MenuItem; sub?: boolean }) {
   );
 }
 
-export default async function AdminMenu() {
+export default async function AdminMenu({ searchParams }: { searchParams: Promise<{ ok?: string }> }) {
   await requireAdmin();
+  const { ok } = await searchParams;
   const items = await loadMenu();
   return (
     <main><div className="wrap">
       <p><Link href="/admin">← 관리자</Link></p>
       <h1 className="pt">메뉴 관리</h1>
+      {ok && <p className="ok" role="status">저장했습니다. 사이트 메뉴에는 최대 30초 안에 반영됩니다.</p>}
       <p className="meta" style={{ whiteSpace: 'normal' }}>주소는 <code>/c/news</code>(게시판), <code>/page/about</code>(페이지)처럼 사이트 안 주소이거나 <code>https://</code>로 시작하는 외부 주소입니다. 조합원 전용 여부(🔒)는 연결된 게시판·페이지의 설정을 따릅니다.</p>
       {items.map((it) => (
         <section key={it.id} className="mgroup">

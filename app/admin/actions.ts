@@ -7,7 +7,6 @@ import { del } from '@vercel/blob';
 import { adminAuth, db } from '@/lib/firebase';
 import { blobToken } from '@/lib/blob';
 import { limit } from '@/lib/ratelimit';
-import { dropMember, syncMember } from '@/lib/members';
 import { extOf } from '@/lib/upload-rules';
 import { requireAdmin, SESSION, SESSION_SEC } from '@/lib/auth';
 import { CATEGORIES, isCat } from '@/lib/content';
@@ -86,7 +85,6 @@ export async function setMember(fd: FormData) {
   if (u.customClaims?.admin) throw new Error('관리자 계정은 여기서 바꿀 수 없습니다.');
   await adminAuth().setCustomUserClaims(uid, { ...(u.customClaims ?? {}), member: on });
   if (!on) await adminAuth().revokeRefreshTokens(uid); // 이미 로그인한 세션도 즉시 무효화
-  if (on) await syncMember(uid); else await dropMember(uid);
   revalidatePath('/admin/members');
 }
 
@@ -96,7 +94,6 @@ export async function deleteUser(fd: FormData) {
   const u = await adminAuth().getUser(uid);
   if (u.customClaims?.admin) throw new Error('관리자 계정은 삭제할 수 없습니다.');
   await adminAuth().deleteUser(uid);
-  await dropMember(uid);
   revalidatePath('/admin/members');
 }
 
