@@ -25,7 +25,7 @@ export default async function Home() {
       <main><div className="wrap">
         <div className="quick">
           <Link href="/page/agreement">단체협약{lock}</Link><Link href="/page/bylaws">규약{lock}</Link>
-          <Link href="/c/forms">양식</Link><Link href="/page/about">조합소개</Link>
+          <Link href="/community">커뮤니티{lock}</Link><Link href="/page/projects">조합사업</Link>
         </div>
         {keys.map((k, i) => (
           <section key={k}>

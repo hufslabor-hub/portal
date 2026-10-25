@@ -9,7 +9,6 @@ export const DEFAULT_MENU: MenuItem[] = [
     { id: 'newsletter', name: '뉴스레터', href: '/c/newsletter' },
   ] },
   { id: 'agreement', name: '단체협약', href: '/page/agreement' },
-  { id: 'bylaws', name: '규약', href: '/page/bylaws' },
   { id: 'community', name: '커뮤니티', href: '', sub: [
     { id: 'members', name: '조합원 찾기', href: '/members' },
     { id: 'board', name: '자유게시판', href: '/board' },
@@ -19,7 +18,7 @@ export const DEFAULT_MENU: MenuItem[] = [
     { id: 'greeting', name: '위원장 인사말', href: '/page/greeting' },
     { id: 'history', name: '조합 역사', href: '/page/history' },
     { id: 'officers', name: '역대 임원진', href: '/page/officers' },
-    { id: 'rules', name: '지부규정', href: '/page/rules' },
+    { id: 'bylaws', name: '규약', href: '/page/bylaws' },
     { id: 'forms', name: '양식', href: '/c/forms' },
   ] },
 ];

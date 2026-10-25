@@ -21,5 +21,5 @@ export function isLocked(href: string, lockedPages: string[]) {
   if (c && (PROTECTED_CATS as string[]).includes(c[1])) return true;
   const p = href.match(/^\/page\/([^/?#]+)/);
   if (p && (PROTECTED_PAGES.includes(p[1]) || lockedPages.includes(p[1]))) return true;
-  return /^\/(members|board|chat|me)(\/|\?|$)/.test(href);
+  return /^\/(community|members|board|chat|me)(\/|\?|$)/.test(href);
 }

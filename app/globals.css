@@ -91,3 +91,17 @@ footer { background:var(--ink); color:rgba(255,255,255,.75); padding:28px 0 calc
 .who { font-size:13px; font-weight:700; margin-bottom:2px; } .bubble { background:var(--paper); border:1px solid var(--line); padding:9px 13px; border-radius:16px; white-space:pre-wrap; word-break:break-word; } .msg.mine .bubble { background:var(--accent); border-color:var(--accent); color:#14213d; }
 .msg .meta { font-size:12px; margin-top:2px; } .linkbtn.xs { font-size:12px; font-weight:500; color:var(--mute); }
 .chatform { display:flex; gap:8px; } .chatform input { flex:1; font:inherit; font-size:16px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--fg); }
+/* PC 상단 메뉴 1.5배, 하위 메뉴 hover 색 */
+header.main .wrap { max-width:1180px; }
+.dnav { font-size:clamp(16px,1.95vw,22.5px); }
+.dd a { font-size:clamp(15px,1.3vw,17px); }
+.dd a:hover { background:var(--ink); color:#fff; }
+/* 그룹챗: 전송 버튼을 입력창 안쪽(오른쪽)에 */
+.chatform { display:block; position:relative; }
+.chatform input { width:100%; min-width:0; padding-right:96px; }
+.chatform .btn { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
+/* 조합원 찾기: 상태 표시 */
+.search select { font:inherit; font-size:16px; padding:11px 10px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--fg); }
+.badge { display:inline-block; margin-left:8px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:700; background:var(--line); color:var(--fg); vertical-align:middle; }
+.badge.warn { background:#d64545; color:#fff; }
+.chips a.warn { border-color:#d64545; color:#d64545; } .chips a.warn.on { background:#d64545; color:#fff; }
