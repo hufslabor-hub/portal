@@ -39,9 +39,9 @@ export async function getPost(id: string): Promise<Post | null> {
   return d.exists && d.data()!.published ? toPost(d) : null;
 }
 
-export async function getPage(slug: string): Promise<{ title: string; body: string } | null> {
+export async function getPage(slug: string): Promise<{ title: string; body: string; membersOnly: boolean } | null> {
   const d = await db().collection('pages').doc(slug).get();
-  return d.exists ? { title: d.data()!.title, body: d.data()!.body ?? '' } : null;
+  return d.exists ? { title: d.data()!.title, body: d.data()!.body ?? '', membersOnly: d.data()!.membersOnly === true } : null;
 }
 
 // 로그인한 조합원(또는 관리자)만 볼 수 있는 항목

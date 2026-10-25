@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 export default async function StaticPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!/^[a-z0-9-]{1,40}$/.test(slug)) notFound();
-  if (PROTECTED_PAGES.includes(slug)) await requireMember(`/page/${slug}`);
   const page = await getPage(slug);
+  if (PROTECTED_PAGES.includes(slug) || page?.membersOnly) await requireMember(`/page/${slug}`);
   if (!page) notFound();
 
   if (slug === 'agreement') {

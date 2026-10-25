@@ -2,6 +2,7 @@ import './globals.css';
 import Link from 'next/link';
 import type { Metadata, Viewport } from 'next';
 import { getRole } from '@/lib/auth';
+import { getMenu, isLocked } from '@/lib/menu';
 import { memberLogout } from './member-actions';
 import MobileMenu from '@/components/MobileMenu';
 
@@ -21,31 +22,16 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#14213d' };
 
-type Item = { href: string; name: string; lock?: boolean };
-type Menu = Item & { sub?: Item[] };
-
-// 상위 메뉴와, 마우스를 올렸을 때 그 메뉴 아래에만 펼쳐지는 하위 메뉴
-const MENU: Menu[] = [
-  { href: '/c/notice', name: '공고' },
-  { href: '/c/news', name: '우리소식', lock: true, sub: [
-    { href: '/c/bargaining', name: '임단협뉴스', lock: true },
-    { href: '/c/letter', name: '위원장 서신' },
-    { href: '/c/newsletter', name: '뉴스레터' },
-  ] },
-  { href: '/page/agreement', name: '단체협약', lock: true },
-  { href: '/page/bylaws', name: '규약', lock: true },
-  { href: '/page/about', name: '조합소개', sub: [
-    { href: '/page/greeting', name: '위원장 인사말' },
-    { href: '/page/history', name: '조합 역사' },
-    { href: '/page/officers', name: '역대 임원진' },
-    { href: '/page/rules', name: '지부규정' },
-    { href: '/c/forms', name: '양식' },
-  ] },
-];
+function L({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) {
+  if (!href) return <span className="nolink">{children}</span>;
+  if (href.startsWith('https://')) return <a href={href} className={className} target="_blank" rel="noopener noreferrer">{children}</a>;
+  return <Link href={href} className={className}>{children}</Link>;
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const role = await getRole();
-  const label = (i: Item) => (i.lock && !role ? `${i.name} 🔒` : i.name);
+  const { items, lockedPages } = await getMenu();
+  const lab = (n: string, href: string) => (!role && isLocked(href, lockedPages) ? `${n} 🔒` : n);
   return (
     <html lang="ko">
       <head><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" /></head>
@@ -53,23 +39,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="main"><div className="wrap">
           <Link href="/" className="logo">HUFS <b>UNION</b></Link>
           <nav className="dnav">
-            {MENU.map((m) => (
-              <div key={m.href} className="ni">
-                <Link href={m.href}>{label(m)}</Link>
-                {m.sub && <div className="dd">{m.sub.map((s) => <Link key={s.href} href={s.href}>{label(s)}</Link>)}</div>}
+            {items.map((m) => (
+              <div key={m.id} className="ni">
+                <L href={m.href}>{lab(m.name, m.href)}</L>
+                {m.sub && m.sub.length > 0 && <div className="dd">{m.sub.map((x) => <L key={x.id} href={x.href}>{lab(x.name, x.href)}</L>)}</div>}
               </div>
             ))}
+            {role && <div className="ni"><Link href="/me">내 정보</Link></div>}
             {role === 'admin' && <div className="ni"><Link href="/admin">관리</Link></div>}
             <div className="ni">{role ? <form action={memberLogout}><button className="linkbtn">로그아웃</button></form> : <Link href="/login">로그인</Link>}</div>
           </nav>
           <MobileMenu>
-              {MENU.map((m) => (
-                <div key={m.href}>
-                  <Link href={m.href}>{label(m)}</Link>
-                  {m.sub?.map((s) => <Link key={s.href} href={s.href} className="subl">{label(s)}</Link>)}
+              {items.map((m) => (
+                <div key={m.id}>
+                  {m.href ? <L href={m.href}>{lab(m.name, m.href)}</L> : <small>{m.name}</small>}
+                  {m.sub?.map((x) => <L key={x.id} href={x.href} className="subl">{lab(x.name, x.href)}</L>)}
                 </div>
               ))}
               <small>계정</small>
+              {role && <Link href="/me">내 정보</Link>}
               {role === 'admin' && <Link href="/admin">관리자 화면</Link>}
               {role ? <form action={memberLogout}><button className="linkbtn" style={{ padding: '16px 4px', fontSize: 19 }}>로그아웃</button></form> : <Link href="/login">조합원 로그인</Link>}
             </MobileMenu>

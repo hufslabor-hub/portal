@@ -76,3 +76,18 @@ footer { background:var(--ink); color:rgba(255,255,255,.75); padding:28px 0 calc
 .prose h3.era .d { font-size:14px; font-weight:500; color:var(--mute); }
 .prose p.lead { font-weight:700; margin:6px 0 14px; padding-left:12px; border-left:3px solid var(--line); }
 .err:focus, .ok:focus { outline:none; }
+/* 메뉴 관리 / 조합원 찾기 / 게시판 / 그룹챗 */
+.nolink { display:flex; align-items:center; height:60px; padding:0 13px; cursor:default; } .ni:hover > .nolink { color:var(--accent); }
+.mgroup { background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:14px; margin:14px 0; }
+.mrow3 { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; margin:6px 0; } .mrow3 .btns { display:flex; gap:6px; }
+.msubs { margin:8px 0 0 16px; padding-left:12px; border-left:3px solid var(--line); }
+.mf { display:flex; flex-wrap:wrap; gap:8px; flex:1; min-width:260px; } .mf input { flex:1; min-width:120px; font:inherit; font-size:16px; padding:9px 12px; border:1px solid var(--line); border-radius:10px; background:var(--paper); color:var(--fg); } .mf.add { margin-top:8px; }
+.search { display:flex; gap:8px; margin:8px 0; } .search input { flex:1; font:inherit; font-size:16px; padding:11px 14px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--fg); }
+.mcard { background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:14px 18px; } .mcard .meta { white-space:normal; }
+.pre { white-space:pre-wrap; word-break:break-word; margin:.6em 0; } .cm { background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:12px 16px; } .cm form { margin-top:6px; }
+.chat { display:flex; flex-direction:column; gap:10px; }
+.chatbox { height:min(62vh,560px); overflow-y:auto; padding:14px; background:var(--card); border:1px solid var(--line); border-radius:var(--r); display:flex; flex-direction:column; gap:12px; }
+.msg { display:flex; flex-direction:column; align-items:flex-start; max-width:85%; } .msg.mine { align-self:flex-end; align-items:flex-end; }
+.who { font-size:13px; font-weight:700; margin-bottom:2px; } .bubble { background:var(--paper); border:1px solid var(--line); padding:9px 13px; border-radius:16px; white-space:pre-wrap; word-break:break-word; } .msg.mine .bubble { background:var(--accent); border-color:var(--accent); color:#14213d; }
+.msg .meta { font-size:12px; margin-top:2px; } .linkbtn.xs { font-size:12px; font-weight:500; color:var(--mute); }
+.chatform { display:flex; gap:8px; } .chatform input { flex:1; font:inherit; font-size:16px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--fg); }

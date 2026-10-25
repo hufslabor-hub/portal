@@ -24,3 +24,9 @@ Next.js + Firestore(Admin SDK) + Vercel.
 3. 저장소 화면의 `.env.local` 탭 값을 `.env.local`에 복사 (Vercel 프로젝트에는 자동 등록됨)
 4. 기존 파일 이전: `node --env-file=.env.local scripts/migrate_files.mjs seed.json seed.migrated.json` → `node --env-file=.env.local scripts/seed.mjs seed.migrated.json`
 - 업로드된 파일은 주소를 아는 누구나 열 수 있습니다. 비공개 문서는 올리지 마세요.
+
+## 조합원 기능 (메뉴 관리 · 조합원 찾기 · 자유게시판 · 그룹챗)
+- 관리자 화면 → **메뉴 관리**에서 상위/하위 메뉴를 추가·수정·삭제·순서 변경
+- 이미 승인된 조합원을 '조합원 찾기' 목록에 넣기: `node --env-file=.env.local scripts/sync_members.mjs` (이후 승인하는 사람은 자동 등록)
+- 자유게시판 작성자 표식용 비밀 키: 환경변수 `ANON_SECRET`(임의의 긴 문자열)을 Vercel에 등록 권장. 없으면 Firebase 비공개 키를 대신 사용
+- 오래된 기록 자동 삭제: Firestore TTL 정책을 `chat_messages`, `ratelimits` 컬렉션의 `expireAt` 필드에 설정(선택)

@@ -1,12 +1,13 @@
 'use server';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { FieldValue } from 'firebase-admin/firestore';
 import { del } from '@vercel/blob';
 import { adminAuth, db } from '@/lib/firebase';
 import { blobToken } from '@/lib/blob';
 import { limit } from '@/lib/ratelimit';
+import { dropMember, syncMember } from '@/lib/members';
 import { extOf } from '@/lib/upload-rules';
 import { requireAdmin, SESSION, SESSION_SEC } from '@/lib/auth';
 import { CATEGORIES, isCat } from '@/lib/content';
@@ -71,8 +72,9 @@ export async function savePage(fd: FormData) {
   await requireAdmin();
   const slug = text(fd, 'slug', 40);
   if (!ID.test(slug)) throw new Error('잘못된 요청');
-  await db().collection('pages').doc(slug).set({ title: text(fd, 'title', 200), body: text(fd, 'body', 200000), updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+  await db().collection('pages').doc(slug).set({ title: text(fd, 'title', 200), body: text(fd, 'body', 200000), membersOnly: fd.get('membersOnly') === 'on', updatedAt: FieldValue.serverTimestamp() }, { merge: true });
   revalidatePath('/', 'layout');
+  revalidateTag('menu');
   redirect('/admin');
 }
 
@@ -84,6 +86,7 @@ export async function setMember(fd: FormData) {
   if (u.customClaims?.admin) throw new Error('관리자 계정은 여기서 바꿀 수 없습니다.');
   await adminAuth().setCustomUserClaims(uid, { ...(u.customClaims ?? {}), member: on });
   if (!on) await adminAuth().revokeRefreshTokens(uid); // 이미 로그인한 세션도 즉시 무효화
+  if (on) await syncMember(uid); else await dropMember(uid);
   revalidatePath('/admin/members');
 }
 
@@ -93,6 +96,7 @@ export async function deleteUser(fd: FormData) {
   const u = await adminAuth().getUser(uid);
   if (u.customClaims?.admin) throw new Error('관리자 계정은 삭제할 수 없습니다.');
   await adminAuth().deleteUser(uid);
+  await dropMember(uid);
   revalidatePath('/admin/members');
 }
 
@@ -125,4 +129,11 @@ export async function verifyUpload(url: string): Promise<boolean> {
     throw new Error('파일 내용이 확장자와 맞지 않아 삭제했습니다.');
   }
   return true;
+}
+
+export async function gotoPage(fd: FormData) {
+  await requireAdmin();
+  const slug = text(fd, 'slug', 40);
+  if (!/^[a-z0-9-]{1,40}$/.test(slug)) throw new Error('주소는 영문 소문자, 숫자, -만 쓸 수 있습니다.');
+  redirect(`/admin/page/${slug}`);
 }
