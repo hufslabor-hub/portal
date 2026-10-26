@@ -30,3 +30,9 @@ Next.js + Firestore(Admin SDK) + Vercel.
 - 조합원 찾기: 구글 스프레드시트 '조합원(전체)' 시트의 이름·소속을 Apps Script 웹 앱(`scripts/apps-script-members-api.gs`)으로 받아옴. Vercel 환경변수 `MEMBERS_API_URL`, `MEMBERS_API_KEY` 필요
 - 자유게시판 작성자 표식용 비밀 키: 환경변수 `ANON_SECRET`(임의의 긴 문자열)을 Vercel에 등록 권장. 없으면 Firebase 비공개 키를 대신 사용
 - 오래된 기록 자동 삭제: Firestore TTL 정책을 `chat_messages`, `ratelimits` 컬렉션의 `expireAt` 필드에 설정(선택)
+
+## 단체협약 카드 입력 형식
+`/page/agreement` 본문에 문서 링크를 넣으면 카드로 나옵니다. 링크 글자는 `2024학년도 단체협약서_조직이름` 형식을 권장합니다.
+- 인식하는 학년도: `2024학년도`, `2024년도`, `2024년`, `2024~2025학년도`, `2022_2023학년도`, `2024-2025학년도`
+- 학년도를 못 찾으면 연도 표시 없이 카드가 나오고, 조직 이름이 비면 링크 글자 전체가 제목이 됩니다.
+- 조직 순서와 이름 바꾸기는 `components/DocGrid.tsx`의 `ORDER`, `RENAME`에서 고칩니다.

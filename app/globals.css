@@ -111,3 +111,5 @@ header.main .wrap { max-width:980px; }
 .ni > a, .ni .linkbtn, .nolink { padding:0 11px; }
 /* 메뉴 관리: 잠금 선택 */
 .lk { display:flex; align-items:center; gap:6px; font-size:14px; white-space:nowrap; font-weight:600; } .lk input[type=checkbox] { width:18px; height:18px; }
+/* 이미지 로딩 중 빈 자리 표시 */
+.prose img { background:var(--card); }

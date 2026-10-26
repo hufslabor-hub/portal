@@ -31,7 +31,8 @@ def inline(nodes, wp, seen):
             out.append(f'<a href="{esc(href)}">{inner}</a>' if href.startswith('https://') else inner)
         elif n == 'img':
             src = (c.get('src') or '').strip().replace(' ', '%20')
-            if src.startswith('https://'): out.append(f'<img src="{esc(src)}" alt="{esc(c.get("alt") or "")}">')
+            dims = ''.join(f' {k}="{c.get(k)}"' for k in ('width', 'height') if str(c.get(k) or '').isdigit())   # 크기를 알면 로딩 중 화면이 흔들리지 않음
+            if src.startswith('https://'): out.append(f'<img src="{esc(src)}" alt="{esc(c.get("alt") or "")}"{dims}>')
         else:
             out.append(inner)
     return ''.join(out)

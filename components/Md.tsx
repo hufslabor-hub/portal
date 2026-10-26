@@ -15,6 +15,7 @@ const schema = {
     span: [['className', 't', 'd', 'mk', 'tx']],
     h2: [['className', 'sec', 'top']],
     h3: [['className', 'era']],
+    img: [...(A.img ?? []), 'width', 'height'],
     td: [...(A.td ?? []), 'colSpan', 'rowSpan'],
     th: [...(A.th ?? []), 'colSpan', 'rowSpan'],
   },
@@ -29,7 +30,7 @@ export default function Md({ text }: { text: string }) {
         components={{
           table: ({ children }) => <div className="tbl"><table>{children}</table></div>,
           a: ({ href, children }) => <a href={href} rel="noopener noreferrer" target="_blank">{children}</a>,
-          img: ({ src, alt }) => (typeof src === 'string' && src.startsWith('https://') ? <img src={src} alt={alt ?? ''} loading="lazy" /> : null),
+          img: ({ src, alt, width, height }) => (typeof src === 'string' && src.startsWith('https://') ? <img src={src} alt={alt ?? ''} width={width} height={height} loading="lazy" decoding="async" /> : null),
         }}
       >{text}</Markdown>
     </div>
