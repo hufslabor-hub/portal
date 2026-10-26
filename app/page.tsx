@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CATEGORIES, getPosts, type Cat } from '@/lib/content';
 import { getRole } from '@/lib/auth';
+import { getLocks, isLocked } from '@/lib/locks';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,9 +9,10 @@ const APPLY_URL = 'https://script.google.com/a/macros/hufs.ac.kr/s/AKfycbzAXBPbj
 
 export default async function Home() {
   const role = await getRole(true);
-  const keys: Cat[] = role ? ['notice', 'news', 'bargaining'] : ['notice'];
+  const locks = await getLocks();
+  const keys = (['notice', 'news', 'bargaining'] as Cat[]).filter((k) => role || !isLocked(`/c/${k}`, locks));
   const lists = await Promise.all(keys.map((k) => getPosts(k, 4)));
-  const lock = role ? '' : ' 🔒';
+  const mark = (h: string) => (!role && isLocked(h, locks) ? ' 🔒' : '');
   return (
     <>
       <section className="hero"><div className="wrap">
@@ -24,8 +26,8 @@ export default async function Home() {
       </div></section>
       <main><div className="wrap">
         <div className="quick">
-          <Link href="/page/agreement">단체협약{lock}</Link><Link href="/page/bylaws">규약{lock}</Link>
-          <Link href="/community">커뮤니티{lock}</Link><Link href="/page/projects">조합사업</Link>
+          <Link href="/page/agreement">단체협약{mark('/page/agreement')}</Link><Link href="/page/bylaws">규약{mark('/page/bylaws')}</Link>
+          <Link href="/community">커뮤니티{mark('/community')}</Link><Link href="/page/projects">조합사업{mark('/page/projects')}</Link>
         </div>
         {keys.map((k, i) => (
           <section key={k}>
@@ -38,7 +40,7 @@ export default async function Home() {
         {!role && (
           <section>
             <h2 className="sec">조합원 전용</h2>
-            <ul className="cards"><li><Link href="/login"><b>🔒 로그인하고 우리소식 · 임단협뉴스 · 단체협약 · 규약 보기</b><time>조합원 로그인 / 가입 신청</time></Link></li></ul>
+            <ul className="cards"><li><Link href="/login"><b>🔒 로그인하고 조합원 전용 소식과 자료 보기</b><time>조합원 로그인 / 가입 신청</time></Link></li></ul>
           </section>
         )}
       </div></main>

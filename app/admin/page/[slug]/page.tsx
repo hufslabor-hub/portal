@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth';
 import { db } from '@/lib/firebase';
-import { PROTECTED_PAGES } from '@/lib/content';
+import { isLocked, loadLocks } from '@/lib/locks';
 import { savePage } from '../../actions';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
   await requireAdmin();
   const { slug } = await params;
   if (!/^[a-z0-9-]{1,40}$/.test(slug)) notFound();
-  const d = await db().collection('pages').doc(slug).get();
+  const [d, locks] = await Promise.all([db().collection('pages').doc(slug).get(), loadLocks()]);
   const v = d.data() ?? {};
   return (
     <main><div className="wrap">
@@ -19,7 +19,8 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
         <input type="hidden" name="slug" value={slug} />
         <label>제목<input name="title" defaultValue={v.title ?? ''} maxLength={200} required /></label>
         <label>본문 (Markdown)<textarea name="body" rows={20} defaultValue={v.body ?? ''} /></label>
-        <label className="chk"><input type="checkbox" name="membersOnly" defaultChecked={v.membersOnly === true || PROTECTED_PAGES.includes(slug)} /> 조합원 전용 (로그인한 조합원만 보기)</label>
+        <label className="chk"><input type="checkbox" name="membersOnly" defaultChecked={isLocked(`/page/${slug}`, locks)} /> 🔒 조합원 전용 (로그인한 조합원만 보기)</label>
+        <label className="chk"><input type="checkbox" name="hub" defaultChecked={v.hub === true} /> 이 페이지가 상위 메뉴일 때, 하위 메뉴를 카드로 보여주기</label>
         <button className="btn">저장</button>
       </form>
     </div></main>

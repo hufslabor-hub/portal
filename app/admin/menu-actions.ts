@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidateTag } from 'next/cache';
 import { db } from '@/lib/firebase';
 import { requireAdmin } from '@/lib/auth';
+import { setLock } from '@/lib/locks';
 import { DEFAULT_MENU, type MenuItem } from '@/lib/menu-data';
 
 const t = (fd: FormData, k: string, max: number) => String(fd.get(k) ?? '').trim().slice(0, max);
@@ -57,6 +58,11 @@ export async function menuSave(fd: FormData) {
         items.push({ id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), false) });
       }
     });
+    // 🔒 조합원 전용 선택(사이트 안 주소에만 적용)
+    if (fd.get('lockable') === '1') {
+      const href = cleanHref(t(fd, 'href', 300), false);
+      if (href.startsWith('/')) await setLock(href, fd.get('lock') === 'on');
+    }
   });
 }
 

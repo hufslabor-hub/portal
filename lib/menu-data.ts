@@ -9,7 +9,7 @@ export const DEFAULT_MENU: MenuItem[] = [
     { id: 'newsletter', name: '뉴스레터', href: '/c/newsletter' },
   ] },
   { id: 'agreement', name: '단체협약', href: '/page/agreement' },
-  { id: 'community', name: '커뮤니티', href: '', sub: [
+  { id: 'community', name: '커뮤니티', href: '/community', sub: [
     { id: 'members', name: '조합원 찾기', href: '/members' },
     { id: 'board', name: '자유게시판', href: '/board' },
     { id: 'chat', name: '그룹챗', href: '/chat' },

@@ -2,7 +2,8 @@ import './globals.css';
 import Link from 'next/link';
 import type { Metadata, Viewport } from 'next';
 import { getRole } from '@/lib/auth';
-import { getMenu, isLocked } from '@/lib/menu';
+import { getMenu } from '@/lib/menu';
+import { isLocked } from '@/lib/locks';
 import { memberLogout } from './member-actions';
 import MobileMenu from '@/components/MobileMenu';
 
@@ -30,8 +31,8 @@ function L({ href, children, className }: { href: string; children: React.ReactN
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const role = await getRole();
-  const { items, lockedPages } = await getMenu();
-  const lab = (n: string, href: string) => (!role && isLocked(href, lockedPages) ? `${n} 🔒` : n);
+  const { items, locks } = await getMenu();
+  const lab = (n: string, href: string) => (!role && isLocked(href, locks) ? `${n} 🔒` : n);
   return (
     <html lang="ko">
       <head><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" /></head>

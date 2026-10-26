@@ -105,3 +105,9 @@ header.main .wrap { max-width:1180px; }
 .badge { display:inline-block; margin-left:8px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:700; background:var(--line); color:var(--fg); vertical-align:middle; }
 .badge.warn { background:#d64545; color:#fff; }
 .chips a.warn { border-color:#d64545; color:#d64545; } .chips a.warn.on { background:#d64545; color:#fff; }
+/* PC 상단 메뉴 글자: 직전보다 0.8배 */
+header.main .wrap { max-width:980px; }
+.dnav { font-size:clamp(13px,1.56vw,18px); }
+.ni > a, .ni .linkbtn, .nolink { padding:0 11px; }
+/* 메뉴 관리: 잠금 선택 */
+.lk { display:flex; align-items:center; gap:6px; font-size:14px; white-space:nowrap; font-weight:600; } .lk input[type=checkbox] { width:18px; height:18px; }

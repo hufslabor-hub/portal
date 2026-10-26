@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CATEGORIES, PROTECTED_CATS, getPosts, isCat } from '@/lib/content';
-import { requireMember } from '@/lib/auth';
+import { CATEGORIES, getPosts, isCat } from '@/lib/content';
+import { requireUnlocked } from '@/lib/locks';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Category({ params }: { params: Promise<{ cat: string }> }) {
   const { cat } = await params;
   if (!isCat(cat)) notFound();
-  if (PROTECTED_CATS.includes(cat)) await requireMember(`/c/${cat}`);
+  await requireUnlocked(`/c/${cat}`);
   const posts = await getPosts(cat, 50);
   return (
     <main><div className="wrap">

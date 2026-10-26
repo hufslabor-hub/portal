@@ -1,7 +1,7 @@
 import Md from '@/components/Md';
 import { notFound } from 'next/navigation';
-import { PROTECTED_CATS, getPost } from '@/lib/content';
-import { requireMember } from '@/lib/auth';
+import { getPost } from '@/lib/content';
+import { requireUnlocked } from '@/lib/locks';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +9,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const post = await getPost(id);
   if (!post) notFound();
-  if (PROTECTED_CATS.includes(post.category)) await requireMember(`/p/${id}`);
+  await requireUnlocked(`/c/${post.category}`, `/p/${id}`);
   return (
     <main><div className="wrap"><article>
       <h1 className="pt">{post.title}</h1>

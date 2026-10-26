@@ -7,6 +7,7 @@ import { del } from '@vercel/blob';
 import { adminAuth, db } from '@/lib/firebase';
 import { blobToken } from '@/lib/blob';
 import { limit } from '@/lib/ratelimit';
+import { setLock } from '@/lib/locks';
 import { extOf } from '@/lib/upload-rules';
 import { requireAdmin, SESSION, SESSION_SEC } from '@/lib/auth';
 import { CATEGORIES, isCat } from '@/lib/content';
@@ -71,7 +72,8 @@ export async function savePage(fd: FormData) {
   await requireAdmin();
   const slug = text(fd, 'slug', 40);
   if (!ID.test(slug)) throw new Error('잘못된 요청');
-  await db().collection('pages').doc(slug).set({ title: text(fd, 'title', 200), body: text(fd, 'body', 200000), membersOnly: fd.get('membersOnly') === 'on', updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+  await db().collection('pages').doc(slug).set({ title: text(fd, 'title', 200), body: text(fd, 'body', 200000), hub: fd.get('hub') === 'on', updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+  await setLock(`/page/${slug}`, fd.get('membersOnly') === 'on');
   revalidatePath('/', 'layout');
   revalidateTag('menu');
   redirect('/admin');

@@ -47,4 +47,28 @@ if (!(await pr.get()).exists) {
   await pr.set({ title: '조합사업', body: '<p class="note">조합사업 안내는 준비 중입니다. 관리자 화면에서 내용을 작성해 주세요.</p>' });
   console.log('조합사업: 빈 페이지를 만들었습니다.');
 }
-console.log('완료. 사이트에는 1~2분 안에 반영됩니다.');
+// 3) 메뉴/페이지 보정: 커뮤니티·조합사업 연결, 조합사업은 '하위 메뉴 카드' 페이지로
+{
+  const m2 = await mref.get();
+  if (m2.exists) {
+    const items = m2.data().items;
+    let changed = false;
+    const community = items.find((i) => i.name === '커뮤니티');
+    if (community && !community.href) { community.href = '/community'; changed = true; }
+    const projects = items.find((i) => i.name === '조합사업');
+    if (projects && !projects.href) { projects.href = '/page/projects'; changed = true; }
+    if (changed) { await mref.set({ items }); console.log('메뉴: 커뮤니티/조합사업에 연결 주소를 넣었습니다.'); }
+  }
+  const p = await pr.get();
+  const body = String(p.data()?.body ?? '');
+  await pr.set({ hub: true, ...(body.includes('준비 중입니다') ? { body: '' } : {}) }, { merge: true });
+  // 잠금 설정 저장소 만들기(없으면 기본 잠금 + 기존에 조합원 전용으로 표시한 페이지)
+  const lref = db.collection('settings').doc('locks');
+  if (!(await lref.get()).exists) {
+    const paths = new Set(['/c/news', '/c/bargaining', '/page/agreement', '/page/bylaws', '/page/rules', '/page/projects']);
+    (await db.collection('pages').where('membersOnly', '==', true).get()).docs.forEach((d) => paths.add('/page/' + d.id));
+    await lref.set({ paths: [...paths] });
+    console.log('잠금: 기본 잠금 설정을 저장했습니다.');
+  }
+}
+console.log('완료. 사이트에는 30초 안에 반영됩니다.');
