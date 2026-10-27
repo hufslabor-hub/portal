@@ -57,7 +57,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {items.map((m) => (
                 <div key={m.id}>
                   {m.href ? <L href={m.href}>{lab(m.name, m.href)}</L> : <small>{m.name}</small>}
-                  {m.sub?.map((x) => <L key={x.id} href={x.href} className="subl">{lab(x.name, x.href)}</L>)}
+                  {m.sub?.filter((x) => x.href !== m.href).map((x) => <L key={x.id} href={x.href} className="subl">{lab(x.name, x.href)}</L>)}
                 </div>
               ))}
               <Link href="/search">🔍 검색</Link>

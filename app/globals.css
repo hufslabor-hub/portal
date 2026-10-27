@@ -130,3 +130,9 @@ main a:hover { color:var(--link); } .prose a { color:var(--link); } .err { color
 .files a.file { display:flex; align-items:center; gap:12px; } .ficon { font-size:22px; } .fname { flex:1; min-width:0; word-break:break-all; font-weight:600; } .fsize { color:var(--mute); font-size:13px; white-space:nowrap; }
 .skel { height:18px; border-radius:8px; margin:14px 0; background:linear-gradient(90deg,var(--line) 25%,var(--card) 50%,var(--line) 75%); background-size:200% 100%; animation:sk 1.3s linear infinite; } .skel-title { height:34px; width:50%; margin-top:28px; }
 @keyframes sk { to { background-position:-200% 0; } } @media (prefers-reduced-motion:reduce) { .skel { animation:none; } }
+/* 조합원 찾기: 소속은 뱃지, 상태는 글자 */
+.stat { margin-left:10px; font-size:14px; color:var(--mute); } .stat.warn { color:var(--err); font-weight:700; }
+/* 모바일 그룹챗: 푸터 숨김 */
+@media (max-width:819px) { body:has(.chat-page) footer { display:none; } }
+/* 게시판 수정 */
+details.cmedit { flex-basis:100%; } details.cmedit summary { list-style:none; cursor:pointer; display:inline-flex; } details.cmedit summary::-webkit-details-marker { display:none; } details.cmedit .form { margin:10px 0 0; }

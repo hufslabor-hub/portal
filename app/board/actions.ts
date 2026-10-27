@@ -65,3 +65,30 @@ export async function deletePost(fd: FormData) {
   }
   redirect('/board');
 }
+
+// ── 수정: 본인이 쓴 글·댓글만(관리자도 남의 글은 지우기만 가능, 고치지는 못함) ──
+export async function updatePost(fd: FormData) {
+  const s = await me();
+  const id = t(fd, 'id', 40), title = t(fd, 'title', 100), body = t(fd, 'body', 3000);
+  if (!ID.test(id) || !title || !body) throw new Error('제목과 내용을 입력하세요.');
+  if (!(await limit('board-edit', s.uid, 30, 3600))) throw new Error('수정 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.');
+  const ref = db().collection('board_posts').doc(id);
+  const p = await ref.get();
+  if (!p.exists) throw new Error('글을 찾을 수 없습니다.');
+  if (p.data()!.authorHash !== anonHash(s.uid)) throw new Error('수정 권한이 없습니다.');
+  await ref.update({ title, body, editedAt: Timestamp.now() });
+  redirect(`/board/${id}`);
+}
+
+export async function updateComment(fd: FormData) {
+  const s = await me();
+  const postId = t(fd, 'postId', 40), id = t(fd, 'id', 40), body = t(fd, 'body', 1000);
+  if (!ID.test(postId) || !ID.test(id) || !body) throw new Error('내용을 입력하세요.');
+  if (!(await limit('board-edit', s.uid, 30, 3600))) throw new Error('수정 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.');
+  const ref = db().collection('board_posts').doc(postId).collection('comments').doc(id);
+  const c = await ref.get();
+  if (!c.exists) throw new Error('댓글을 찾을 수 없습니다.');
+  if (c.data()!.authorHash !== anonHash(s.uid)) throw new Error('수정 권한이 없습니다.');
+  await ref.update({ body, editedAt: Timestamp.now() });
+  redirect(`/board/${postId}`);
+}

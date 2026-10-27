@@ -4,6 +4,8 @@ export type MenuItem = { id: string; name: string; href: string; sub?: MenuItem[
 export const DEFAULT_MENU: MenuItem[] = [
   { id: 'notice', name: '공고', href: '/c/notice' },
   { id: 'news', name: '우리소식', href: '/c/news', sub: [
+    { id: 'news-all', name: '우리소식', href: '/c/news' },
+    { id: 'notice-sub', name: '공고', href: '/c/notice' },
     { id: 'bargaining', name: '임단협뉴스', href: '/c/bargaining' },
     { id: 'letter', name: '위원장 서신', href: '/c/letter' },
     { id: 'newsletter', name: '뉴스레터', href: '/c/newsletter' },

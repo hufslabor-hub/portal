@@ -54,8 +54,8 @@ export default async function Members({ searchParams }: { searchParams: Promise<
 
   const card = (m: SheetMember, i: number) => (
     <li key={i} className="mcard">
-      <b>{m.name}</b>{m.dept && <span className="meta"> {m.dept}</span>}
-      {m.status && <span className={`badge${isSuspended(m.status) ? ' warn' : ''}`}>{m.status}</span>}
+      <b>{m.name}</b>{m.dept && <span className="badge">{m.dept}</span>}
+      {m.status && <span className={`stat${isSuspended(m.status) ? ' warn' : ''}`}>{m.status}</span>}
     </li>
   );
 

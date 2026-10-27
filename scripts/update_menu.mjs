@@ -71,4 +71,22 @@ if (!(await pr.get()).exists) {
     console.log('잠금: 기본 잠금 설정을 저장했습니다.');
   }
 }
+// 4) 우리소식 하위 메뉴 순서(우리소식 → 공고 → 나머지)와 /projects 처럼 /page/ 가 빠진 주소 보정
+{
+  const m3 = await mref.get();
+  if (m3.exists) {
+    const items = m3.data().items;
+    let changed = false;
+    const news = items.find((i) => i.href === '/c/news');
+    if (news) {
+      const rest = (news.sub ?? []).filter((x) => x.href !== '/c/news' && x.href !== '/c/notice');
+      const next = [{ id: 'news-all', name: '우리소식', href: '/c/news' }, { id: 'notice-sub', name: '공고', href: '/c/notice' }, ...rest];
+      if (JSON.stringify(next) !== JSON.stringify(news.sub)) { news.sub = next; changed = true; }
+    }
+    const KNOWN = new Set(['community', 'members', 'board', 'chat', 'me', 'search', 'login', 'signup', 'forgot', 'admin']);
+    const fix = (it) => { const m = it.href.match(/^\/([a-z0-9-]+)$/); if (m && !KNOWN.has(m[1])) { it.href = '/page/' + m[1]; changed = true; } };
+    items.forEach((i) => { fix(i); (i.sub ?? []).forEach(fix); });
+    if (changed) { await mref.set({ items }); console.log('메뉴: 우리소식 하위 메뉴 순서와 잘못된 주소를 고쳤습니다.'); }
+  }
+}
 console.log('완료. 사이트에는 30초 안에 반영됩니다.');

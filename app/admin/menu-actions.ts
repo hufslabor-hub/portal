@@ -13,7 +13,9 @@ function cleanHref(h: string, required: boolean) {
   h = h.trim();
   if (!h) { if (required) throw new Error('주소를 입력하세요. (예: /page/projects 또는 https://…)'); return ''; }
   if (/^http:\/\//i.test(h)) throw new Error('외부 주소는 https:// 로 시작해야 합니다.');
-  if (!/^(\/|https:\/\/)/.test(h) && /^[A-Za-z0-9\-_./?=&%가-힣]+$/.test(h)) h = '/' + h;   // 앞의 / 를 빠뜨린 경우 보정
+  // 주소를 짧게 적은 경우 보정: projects → /page/projects, 그 밖의 글자는 앞에 / 만 붙임
+  if (/^[a-z0-9-]{1,40}$/.test(h)) h = '/page/' + h;
+  else if (!/^(\/|https:\/\/)/.test(h) && /^[A-Za-z0-9\-_./?=&%가-힣]+$/.test(h)) h = '/' + h;
   if (/^\/(?!\/)[A-Za-z0-9\-_./?=&%가-힣]{0,200}$/.test(h) || /^https:\/\/[^\s"'<>]{1,300}$/.test(h)) return h;
   throw new Error('주소는 /page/이름 처럼 사이트 안 주소이거나 https:// 로 시작하는 외부 주소여야 합니다.');
 }

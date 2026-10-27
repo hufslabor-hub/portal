@@ -4,11 +4,29 @@ import Md from '@/components/Md';
 import DocGrid, { extractDocs } from '@/components/DocGrid';
 import { notFound } from 'next/navigation';
 import { getPage } from '@/lib/content';
-import { getRole } from '@/lib/auth';
+import { getRole, type Role } from '@/lib/auth';
 import { getMenu } from '@/lib/menu';
 import { getLocks, isLocked, normPath, requireUnlocked } from '@/lib/locks';
 
 export const dynamic = 'force-dynamic';
+
+type Card = { id: string; name: string; href: string };
+
+// 상위 메뉴의 하위 메뉴를 카드로 나열(조합사업 등)
+function HubCards({ cards, locks, role }: { cards: Card[]; locks: string[]; role: Role }) {
+  return (
+    <div className="docs">
+      {cards.map((c) => (
+        <article key={c.id} className="doc">
+          <h3>{!role && isLocked(c.href, locks) ? `${c.name} 🔒` : c.name}</h3>
+          {c.href.startsWith('https://')
+            ? <a className="btn sm" href={c.href} target="_blank" rel="noopener noreferrer">열기</a>
+            : <Link className="btn sm" href={c.href || '#'}>열기</Link>}
+        </article>
+      ))}
+    </div>
+  );
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -25,7 +43,20 @@ export default async function StaticPage({ params }: { params: Promise<{ slug: s
   if (!/^[a-z0-9-]{1,40}$/.test(slug)) notFound();
   await requireUnlocked(`/page/${slug}`);
   const page = await getPage(slug);
-  if (!page) notFound();
+  const menu = await getMenu();
+  const top = menu.items.find((i) => normPath(i.href) === `/page/${slug}`);
+  const subs: Card[] = top?.sub?.filter((x) => normPath(x.href) !== `/page/${slug}`) ?? [];
+
+  // 페이지 문서를 아직 만들지 않았어도, 메뉴에서 이 주소를 상위 메뉴로 쓰고 하위 메뉴가 있으면 카드로 보여 줌(404 방지)
+  if (!page) {
+    if (!subs.length) notFound();
+    return (
+      <main><div className="wrap">
+        <h1 className="pt">{top!.name}</h1>
+        <HubCards cards={subs} locks={menu.locks} role={await getRole()} />
+      </div></main>
+    );
+  }
 
   if (slug === 'agreement') {
     const { docs, rest } = extractDocs(page.body);
@@ -44,30 +75,13 @@ export default async function StaticPage({ params }: { params: Promise<{ slug: s
     }
   }
 
-  // '하위 메뉴를 카드로 보여주기'가 켜진 페이지: 이 페이지가 상위 메뉴일 때 그 하위 메뉴를 카드로 나열
-  let cards: { id: string; name: string; href: string }[] = [];
-  let locks: string[] = [];
-  if (page.hub) {
-    const m = await getMenu();
-    locks = m.locks;
-    cards = m.items.find((i) => normPath(i.href) === `/page/${slug}`)?.sub ?? [];
-  }
+  // '하위 메뉴를 카드로 보여주기'가 켜진 페이지
+  const cards = page.hub ? subs : [];
   const role = cards.length ? await getRole() : null;
   return (
     <main><div className="wrap">
       <h1 className="pt">{page.title}</h1>
-      {cards.length > 0 && (
-        <div className="docs">
-          {cards.map((c) => (
-            <article key={c.id} className="doc">
-              <h3>{!role && isLocked(c.href, locks) ? `${c.name} 🔒` : c.name}</h3>
-              {c.href.startsWith('https://')
-                ? <a className="btn sm" href={c.href} target="_blank" rel="noopener noreferrer">열기</a>
-                : <Link className="btn sm" href={c.href || '#'}>열기</Link>}
-            </article>
-          ))}
-        </div>
-      )}
+      {cards.length > 0 && <HubCards cards={cards} locks={menu.locks} role={role} />}
       <Md text={page.body} />
     </div></main>
   );
