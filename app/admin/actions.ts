@@ -39,9 +39,12 @@ const text = (fd: FormData, k: string, max: number) => String(fd.get(k) ?? '').t
 
 function parseFiles(raw: string) {
   return raw.split('\n').map((l) => l.trim()).filter(Boolean).slice(0, 10).map((l) => {
-    const [name, ...u] = l.split('|'); const url = u.join('|').trim();
+    // 형식: 이름 | https://주소 | 용량(바이트, 선택)
+    const parts = l.split('|'); const last = parts[parts.length - 1].trim();
+    const hasSize = parts.length >= 3 && /^\d{1,9}$/.test(last);
+    const url = (hasSize ? parts.slice(1, -1) : parts.slice(1)).join('|').trim();
     if (!url.startsWith('https://')) throw new Error(`첨부 주소는 https:// 로 시작해야 합니다: ${l}`);
-    return { name: name.trim().slice(0, 100) || '첨부파일', url };
+    return { name: parts[0].trim().slice(0, 100) || '첨부파일', url, ...(hasSize ? { size: Number(last) } : {}) };
   });
 }
 
@@ -56,6 +59,7 @@ export async function savePost(fd: FormData) {
   if (id === 'new') { const ref = col.doc(); await ref.set({ ...data, createdAt: FieldValue.serverTimestamp() }); }
   else { if (!ID.test(id)) throw new Error('잘못된 요청'); await col.doc(id).set(data, { merge: true }); }
   revalidatePath('/', 'layout');
+  revalidateTag('posts');
   redirect('/admin');
 }
 
@@ -65,6 +69,7 @@ export async function deletePost(fd: FormData) {
   if (!ID.test(id)) throw new Error('잘못된 요청');
   await db().collection('posts').doc(id).delete();
   revalidatePath('/', 'layout');
+  revalidateTag('posts');
   redirect('/admin');
 }
 

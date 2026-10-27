@@ -1,17 +1,17 @@
 import Link from 'next/link';
-import { CATEGORIES, getPosts, type Cat } from '@/lib/content';
+import { CATEGORIES, getRecent, type Cat } from '@/lib/content';
+import { APPLY_URL } from '@/lib/links';
 import { getRole } from '@/lib/auth';
 import { getLocks, isLocked } from '@/lib/locks';
 
 export const dynamic = 'force-dynamic';
 
-const APPLY_URL = 'https://script.google.com/a/macros/hufs.ac.kr/s/AKfycbzAXBPbje2UD12DwtYReu98ifbCo2-b-4DZx8hwVpF-iIVGNeAr3Fr47ZPufskVecQ/exec?page=apply';
 
 export default async function Home() {
   const role = await getRole(true);
   const locks = await getLocks();
   const keys = (['notice', 'news', 'bargaining'] as Cat[]).filter((k) => role || !isLocked(`/c/${k}`, locks));
-  const lists = await Promise.all(keys.map((k) => getPosts(k, 4)));
+  const lists = await Promise.all(keys.map((k) => getRecent(k, 4)));
   const mark = (h: string) => (!role && isLocked(h, locks) ? ' 🔒' : '');
   return (
     <>

@@ -17,7 +17,7 @@ export default function UploadBox({ targetId }: { targetId: string }) {
       setMsg('파일 검사 중…');
       await verifyUpload(blob.url); // 파일 내용(앞부분)이 확장자와 맞는지 서버에서 확인, 다르면 삭제
       const ta = document.getElementById(targetId) as HTMLTextAreaElement;
-      ta.value = (ta.value ? ta.value.trimEnd() + '\n' : '') + `${file.name.replace(/\|/g, '-')} | ${blob.url}`;
+      ta.value = (ta.value ? ta.value.trimEnd() + '\n' : '') + `${file.name.replace(/\|/g, '-')} | ${blob.url} | ${file.size}`;
       setMsg(`✔ ${file.name} 추가됨 (저장 버튼을 눌러야 반영됩니다)`);
     } catch (err) { setMsg(err instanceof Error ? err.message : '업로드에 실패했습니다.'); }
     e.target.value = '';

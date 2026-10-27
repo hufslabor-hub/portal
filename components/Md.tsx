@@ -5,6 +5,9 @@ import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 
 // 본문에 HTML을 쓸 수 있지만, 아래 허용 목록 밖의 태그·속성(script, style, onclick 등)은 모두 제거됨 → XSS 차단.
 // 정렬/들여쓰기는 style 대신 미리 정해 둔 class 이름만 허용.
+// ── 허용 class 목록(새 서식을 추가하려면 여기와 globals.css를 함께 고칠 것) ──
+//   p: ta-center ta-right in1~in4 li lead sub note   span: t d mk tx   h2: sec top   h3: era
+//   img: width height   td/th: colSpan rowSpan
 const A = defaultSchema.attributes ?? {};
 const schema = {
   ...defaultSchema,

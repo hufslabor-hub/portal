@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Md from '@/components/Md';
 import DocGrid, { extractDocs } from '@/components/DocGrid';
@@ -5,9 +6,19 @@ import { notFound } from 'next/navigation';
 import { getPage } from '@/lib/content';
 import { getRole } from '@/lib/auth';
 import { getMenu } from '@/lib/menu';
-import { isLocked, normPath, requireUnlocked } from '@/lib/locks';
+import { getLocks, isLocked, normPath, requireUnlocked } from '@/lib/locks';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  if (!/^[a-z0-9-]{1,40}$/.test(slug)) return {};
+  const page = await getPage(slug);
+  if (!page) return {};
+  const [locks, role] = await Promise.all([getLocks(), getRole()]);
+  if (!role && isLocked(`/page/${slug}`, locks)) return { title: '조합원 전용', robots: { index: false } };
+  return { title: page.title, openGraph: { title: page.title, type: 'website', images: ['/og.png'] } };
+}
 
 export default async function StaticPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -27,6 +38,9 @@ export default async function StaticPage({ params }: { params: Promise<{ slug: s
           {rest && <Md text={rest} />}
         </div></main>
       );
+    }
+    if (!page.body.trim()) {   // 아직 협약서 링크가 하나도 없을 때
+      return (<main><div className="wrap"><h1 className="pt">{page.title}</h1><p className="meta" style={{ whiteSpace: 'normal' }}>등록된 단체협약서가 없습니다. 관리자 화면에서 이 페이지에 <b>2024학년도 단체협약서_조직이름</b> 형식의 링크를 추가해 주세요.</p></div></main>);
     }
   }
 

@@ -113,3 +113,20 @@ header.main .wrap { max-width:980px; }
 .lk { display:flex; align-items:center; gap:6px; font-size:14px; white-space:nowrap; font-weight:600; } .lk input[type=checkbox] { width:18px; height:18px; }
 /* 이미지 로딩 중 빈 자리 표시 */
 .prose img { background:var(--card); }
+/* ── 접근성·색 대비(밝은 배경의 노란 글자는 대비가 낮아 링크 색을 따로 둠) ── */
+:root { --link:#0b3d91; --err:#b91c1c; --ok:#15803d; }
+@media (prefers-color-scheme: dark) { :root { --link:#f4a52b; --err:#ff8a80; --ok:#4ade80; } .prose img { filter:brightness(.92); } }
+main a:hover { color:var(--link); } .prose a { color:var(--link); } .err { color:var(--err); } .ok { color:var(--ok); }
+:focus-visible { outline:3px solid #4c8dff; outline-offset:2px; }
+.skip { position:absolute; left:-9999px; top:8px; z-index:100; background:#fff; color:#14213d; padding:10px 14px; border-radius:8px; font-weight:700; } .skip:focus { left:8px; }
+#main:focus { outline:none; }
+/* ── 목록 요약·썸네일, 페이지 이동, 첨부파일, 불러오는 중 ── */
+.cards a.withthumb { display:flex; gap:14px; align-items:center; } .cards a > div { min-width:0; }
+.thumb { flex:none; width:76px; height:76px; object-fit:cover; border-radius:10px; background:var(--line); }
+.excerpt { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; color:var(--mute); font-size:14px; line-height:1.5; margin:2px 0; }
+.pager { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:24px 0; }
+.pager a, .pager span { min-width:42px; height:42px; display:inline-flex; align-items:center; justify-content:center; padding:0 12px; border:1px solid var(--line); border-radius:10px; background:var(--card); font-weight:600; }
+.pager .cur { background:var(--ink); color:#fff; border-color:var(--ink); } .pager .off { opacity:.4; }
+.files a.file { display:flex; align-items:center; gap:12px; } .ficon { font-size:22px; } .fname { flex:1; min-width:0; word-break:break-all; font-weight:600; } .fsize { color:var(--mute); font-size:13px; white-space:nowrap; }
+.skel { height:18px; border-radius:8px; margin:14px 0; background:linear-gradient(90deg,var(--line) 25%,var(--card) 50%,var(--line) 75%); background-size:200% 100%; animation:sk 1.3s linear infinite; } .skel-title { height:34px; width:50%; margin-top:28px; }
+@keyframes sk { to { background-position:-200% 0; } } @media (prefers-reduced-motion:reduce) { .skel { animation:none; } }
