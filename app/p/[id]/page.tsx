@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
 import Md from '@/components/Md';
+import Comments from '@/components/Comments';
 import { notFound } from 'next/navigation';
 import { excerptOf, firstImage, getPost } from '@/lib/content';
 import { getRole } from '@/lib/auth';
 import { getLocks, isLocked, requireUnlocked } from '@/lib/locks';
 
 export const dynamic = 'force-dynamic';
+
+// 댓글을 받는 카테고리 (lib/content.ts 의 CATEGORIES 키). 다른 카테고리에도 열려면 여기에 키를 추가하세요.
+const COMMENT_CATS: string[] = ['bargaining'];   // 임단협뉴스
 
 const ICON: Record<string, string> = { pdf: '📕', png: '🖼️', jpg: '🖼️', jpeg: '🖼️', gif: '🖼️', webp: '🖼️', docx: '📘', hwp: '📄', hwpx: '📄', xlsx: '📗', pptx: '📙' };
 const extOf = (name: string, url: string) => (name.split('.').pop() ?? url.split('?')[0].split('.').pop() ?? '').toLowerCase().slice(0, 5);
@@ -51,6 +55,8 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           </ul>
         </>
       )}
-    </article></div></main>
+    </article>
+      {COMMENT_CATS.includes(post.category) && <Comments scope="post" postId={post.id} path={`/p/${id}`} />}
+    </div></main>
   );
 }

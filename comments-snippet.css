@@ -1,0 +1,13 @@
+/* ── 댓글 (globals.css 맨 아래에 붙여 넣기) ── */
+.cmts { margin-top:40px; padding-top:8px; border-top:2px solid var(--accent); }
+.cmts h2 { font-size:19px; margin:16px 0 12px; }
+.cmts .cmlist { list-style:none; margin:0 0 16px; padding:0; display:grid; gap:10px; }
+.cmts .cmbody { margin:0 0 6px; white-space:pre-wrap; word-break:break-word; }
+.cmts .cmrow { display:flex; flex-wrap:wrap; align-items:center; gap:0 14px; }
+.cmts .cmrow .meta { white-space:normal; }
+/* 수정·삭제 메뉴: 닫혀 있을 땐 날짜 옆에 나란히, 펼치면 한 줄 전체 */
+.cmts details.cmedit { flex-basis:auto; }
+.cmts details.cmedit[open] { flex-basis:100%; }
+.cmts details.cmedit summary { padding:8px 2px; font-size:14px; }
+.cmts .cmform { margin:8px 0 0; }
+.cmts .cmform textarea, .cmts details .form textarea { resize:vertical; min-height:84px; }
