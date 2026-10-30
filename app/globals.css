@@ -150,3 +150,9 @@ details.cmedit { flex-basis:100%; } details.cmedit summary { list-style:none; cu
 .cmts details.cmedit summary { padding:8px 2px; font-size:14px; }
 .cmts .cmform { margin:8px 0 0; }
 .cmts .cmform textarea, .cmts details .form textarea { resize:vertical; min-height:84px; }
+
+/* ── 원본의 "1)" 괄호 번호 목록 (globals.css 맨 아래에 붙여 넣기) ── */
+/* Md.tsx 가 "1)" 로 쓴 번호 목록에만 paren 클래스를 붙입니다. "1." 목록은 그대로 둡니다. */
+.prose ol.paren { list-style:none; padding-left:0; }
+.prose ol.paren > li { position:relative; padding-left:2em; }
+.prose ol.paren > li::before { content:counter(list-item) ")"; position:absolute; left:0; }
