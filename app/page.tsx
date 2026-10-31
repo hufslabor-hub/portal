@@ -3,25 +3,26 @@ import { CATEGORIES, getRecent, type Cat } from '@/lib/content';
 import { APPLY_URL } from '@/lib/links';
 import { getRole } from '@/lib/auth';
 import { getLocks, isLocked } from '@/lib/locks';
+import { getHomeText } from '@/lib/home-text';
+import HeroTitle from '@/components/HeroTitle';
 
 export const dynamic = 'force-dynamic';
 
 
 export default async function Home() {
-  const role = await getRole(true);
-  const locks = await getLocks();
+  const [role, locks, tx] = await Promise.all([getRole(true), getLocks(), getHomeText()]);   // tx: 관리자가 고친 메인 문구(없으면 기본 문구)
   const keys = (['notice', 'news', 'bargaining'] as Cat[]).filter((k) => role || !isLocked(`/c/${k}`, locks));
   const lists = await Promise.all(keys.map((k) => getRecent(k, 4)));
   const mark = (h: string) => (!role && isLocked(h, locks) ? ' 🔒' : '');
   return (
     <>
       <section className="hero"><div className="wrap">
-        <h1>함께 일하는 사람들의<br /><em>목소리</em>, 한국외대 노동조합</h1>
-        <p>공고와 교섭 소식을 가장 먼저 확인하세요.</p>
+        <h1><HeroTitle text={tx.heroTitle} /></h1>
+        <p>{tx.heroSub}</p>
         <div className="btns">
-          <a className="btn" href={APPLY_URL} target="_blank" rel="noopener noreferrer">가입신청서</a>
-          <a className="btn insta" href="https://www.instagram.com/hufs_labor_union/" target="_blank" rel="noopener noreferrer">인스타그램</a>
-          <a className="btn kakao" href="https://pf.kakao.com/_Pxnjxkxj" rel="noopener noreferrer">카카오톡 채널</a>
+          <a className="btn" href={APPLY_URL} target="_blank" rel="noopener noreferrer">{tx.applyLabel}</a>
+          <a className="btn insta" href="https://www.instagram.com/hufs_labor_union/" target="_blank" rel="noopener noreferrer">{tx.instaLabel}</a>
+          <a className="btn kakao" href="https://pf.kakao.com/_Pxnjxkxj" rel="noopener noreferrer">{tx.kakaoLabel}</a>
         </div>
       </div></section>
       <main><div className="wrap">
@@ -40,7 +41,7 @@ export default async function Home() {
         {!role && (
           <section>
             <h2 className="sec">조합원 전용</h2>
-            <ul className="cards"><li><Link href="/login"><b>🔒 로그인하고 조합원 전용 소식과 자료 보기</b><time>조합원 로그인 / 가입 신청</time></Link></li></ul>
+            <ul className="cards"><li><Link href="/login"><b>🔒 {tx.memberBoxTitle}</b><time>{tx.memberBoxSub}</time></Link></li></ul>
           </section>
         )}
       </div></main>

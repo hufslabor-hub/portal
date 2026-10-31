@@ -156,3 +156,13 @@ details.cmedit { flex-basis:100%; } details.cmedit summary { list-style:none; cu
 .prose ol.paren { list-style:none; padding-left:0; }
 .prose ol.paren > li { position:relative; padding-left:2em; }
 .prose ol.paren > li::before { content:counter(list-item) ")"; position:absolute; left:0; }
+
+/* ── 관리자·조합원 관리 화면 (globals.css 맨 아래에 붙여 넣기) ── */
+/* 카드 안 버튼들(정보 수정 / 관리자 지정·해제)을 한 줄에 나란히, 확인 창을 펼치면 한 줄 전체로 */
+.acts { display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; margin-top:12px; }
+.acts details.cmedit { flex-basis:auto; }
+.acts details.cmedit[open] { flex-basis:100%; }
+.acts details.cmedit summary { align-items:center; min-height:40px; padding:0 16px; border:1.5px solid var(--line); border-radius:999px; font-weight:600; color:var(--fg); }
+.acts details.cmedit summary:hover { border-color:var(--accent); }
+.acts details.cmedit summary.warn { color:#d64545; border-color:#d64545; }
+.acts details.cmedit form { margin-top:10px; }
