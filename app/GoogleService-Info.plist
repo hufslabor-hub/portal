@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>252535545558-lh00t9001g33pc04pv1lsr8r7c6dsnbo.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.252535545558-lh00t9001g33pc04pv1lsr8r7c6dsnbo</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCs2V5bRNhDzn29wOlxXfpLNU7qRcn3Y3c</string>
+	<key>GCM_SENDER_ID</key>
+	<string>252535545558</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>hufslabor2</string>
+	<key>PROJECT_ID</key>
+	<string>hufs-labor-portal</string>
+	<key>STORAGE_BUCKET</key>
+	<string>hufs-labor-portal.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:252535545558:ios:eaa828fa4b8c954907b377</string>
+</dict>
+</plist>

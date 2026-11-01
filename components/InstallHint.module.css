@@ -1,0 +1,5 @@
+.bar { position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:50; display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:14px; background:#14213d; color:#fff; box-shadow:0 8px 28px rgba(0,0,0,.35); font-size:15px; line-height:1.4; }
+.bar span { flex:1; }
+.bar a { color:#f4a52b; font-weight:700; white-space:nowrap; }
+.bar button { background:none; border:0; color:#fff; font-size:20px; line-height:1; padding:6px 8px; cursor:pointer; opacity:.8; }
+@media (min-width:820px) { .bar { display:none; } }
