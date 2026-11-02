@@ -1,0 +1,10 @@
+/* 조합원 찾기: 좁은 화면에서도 검색줄과 구분 버튼이 화면 밖으로 나가지 않고 줄바꿈 */
+.row { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; }
+.row .q { flex:1 1 100%; min-width:0; }
+.row .sort { flex:1 1 150px; min-width:0; }
+.row .go { flex:0 0 auto; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px; }
+.chips a { padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:var(--card); font-size:14px; font-weight:600; line-height:1.4; }
+.chips a.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+.chips a.warn { border-color:var(--err); color:var(--err); }
+.chips a.warn.on { background:var(--err); color:#fff; border-color:var(--err); }

@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { deleteChat, sendChat } from '@/app/chat/actions';
+import ui from './ChatRoom.module.css';
 
 type Msg = { id: string; name: string; text: string; ts: number; mine: boolean };
 const hm = (ts: number) => new Date(ts).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' });
+const atBottom = () => window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 160;
 
 export default function ChatRoom({ initial, isAdmin }: { initial: Msg[]; isAdmin: boolean }) {
   const [msgs, setMsgs] = useState(initial);
@@ -11,8 +13,8 @@ export default function ChatRoom({ initial, isAdmin }: { initial: Msg[]; isAdmin
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const last = useRef(initial.at(-1)?.ts ?? 0);
-  const box = useRef<HTMLDivElement>(null);
-  const stick = useRef(true);
+  const stick = useRef(true);      // 맨 아래를 보고 있을 때만 새 메시지가 오면 따라 내려감
+  const first = useRef(true);
 
   const add = (list: Msg[]) => {
     if (!list.length) return;
@@ -36,11 +38,18 @@ export default function ChatRoom({ initial, isAdmin }: { initial: Msg[]; isAdmin
     };
     const iv = setInterval(poll, 5000);
     const onVis = () => { if (document.visibilityState === 'visible') poll(); };
+    const onScroll = () => { stick.current = atBottom(); };
     document.addEventListener('visibilitychange', onVis);
-    return () => { stop = true; clearInterval(iv); document.removeEventListener('visibilitychange', onVis); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { stop = true; clearInterval(iv); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('scroll', onScroll); };
   }, []);
 
-  useEffect(() => { const el = box.current; if (el && stick.current) el.scrollTop = el.scrollHeight; }, [msgs]);
+  // 처음 열면 가장 최근 대화로, 이후에는 맨 아래를 보고 있을 때만 따라 내려감
+  useEffect(() => {
+    if (!stick.current) return;
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: first.current ? 'auto' : 'smooth' });
+    first.current = false;
+  }, [msgs]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -57,22 +66,24 @@ export default function ChatRoom({ initial, isAdmin }: { initial: Msg[]; isAdmin
   }
 
   return (
-    <div className="chat">
-      <div className="chatbox" ref={box} onScroll={(e) => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }} aria-live="polite">
-        {!msgs.length && <p className="meta">아직 대화가 없습니다. 첫 메시지를 남겨 보세요.</p>}
+    <div className={ui.chat}>
+      <div className={ui.list} aria-live="polite">
+        {!msgs.length && <p className={ui.empty}>아직 대화가 없습니다. 첫 메시지를 남겨 보세요.</p>}
         {msgs.map((m) => (
-          <div key={m.id} className={`msg${m.mine ? ' mine' : ''}`}>
-            {!m.mine && <span className="who">{m.name}</span>}
-            <div className="bubble">{m.text}</div>
-            <span className="meta">{hm(m.ts)}{(m.mine || isAdmin) && <button type="button" className="linkbtn xs" onClick={() => remove(m.id)}> 삭제</button>}</span>
+          <div key={m.id} className={`${ui.msg}${m.mine ? ` ${ui.mine}` : ''}`}>
+            {!m.mine && <span className={ui.who}>{m.name}</span>}
+            <div className={ui.bubble}>{m.text}</div>
+            <span className={ui.time}>{hm(m.ts)}{(m.mine || isAdmin) && <button type="button" className={ui.del} onClick={() => remove(m.id)}>삭제</button>}</span>
           </div>
         ))}
       </div>
-      <form onSubmit={submit} className="chatform">
-        <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="메시지를 입력하세요" aria-label="메시지" enterKeyHint="send" autoComplete="off" />
-        <button className="btn sm" disabled={busy || !text.trim()}>보내기</button>
+      <form onSubmit={submit} className={ui.form}>
+        {err && <p className={ui.err} role="alert">{err}</p>}
+        <div className={ui.field}>
+          <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder="메시지를 입력하세요" aria-label="메시지" enterKeyHint="send" autoComplete="off" />
+          <button className={`btn sm ${ui.send}`} disabled={busy || !text.trim()}>보내기</button>
+        </div>
       </form>
-      {err && <p className="err" role="alert">{err}</p>}
     </div>
   );
 }

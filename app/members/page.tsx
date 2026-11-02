@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { requireSession } from '@/lib/auth';
 import { getSheetMembers, type SheetMember } from '@/lib/members-sheet';
+import ui from './members.module.css';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: '조합원 찾기' };
@@ -62,16 +63,16 @@ export default async function Members({ searchParams }: { searchParams: Promise<
   return (
     <main><div className="wrap">
       <h1 className="pt">조합원 찾기</h1>
-      <form className="search" role="search">
-        <input name="q" defaultValue={q} maxLength={40} placeholder="이름·소속·상태 검색" aria-label="검색" />
-        <select name="sort" defaultValue={sort} aria-label="정렬">{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select>
+      <form className={`search ${ui.row}`} role="search">
+        <input name="q" className={ui.q} defaultValue={q} maxLength={40} placeholder="이름·소속·상태 검색" aria-label="검색" />
+        <select name="sort" className={ui.sort} defaultValue={sort} aria-label="정렬">{(Object.keys(SORTS) as SortKey[]).map((k) => <option key={k} value={k}>{SORTS[k]}</option>)}</select>
         {status && <input type="hidden" name="status" value={status} />}
-        <button className="btn sm">보기</button>
+        <button className={`btn sm ${ui.go}`}>보기</button>
       </form>
       {statuses.length > 1 && (
-        <div className="chips" style={{ marginTop: 8 }}>
-          <Link href={href({ status: '' })} className={!status ? 'on' : ''}>전체 {all.length}</Link>
-          {statuses.map((s) => <Link key={s} href={href({ status: s })} className={`${status === s ? 'on' : ''}${isSuspended(s) ? ' warn' : ''}`}>{s} {counts.get(s)}</Link>)}
+        <div className={ui.chips}>
+          <Link href={href({ status: '' })} className={!status ? ui.on : ''}>전체 {all.length}</Link>
+          {statuses.map((s) => <Link key={s} href={href({ status: s })} className={`${status === s ? ui.on : ''} ${isSuspended(s) ? ui.warn : ''}`}>{s} {counts.get(s)}</Link>)}
         </div>
       )}
       {error ? <p className="err" role="alert">{error}</p> : <p className="meta" style={{ whiteSpace: 'normal' }}>{list.length}명 · 노동조합 조합원 명단을 5분마다 새로 불러옵니다.</p>}

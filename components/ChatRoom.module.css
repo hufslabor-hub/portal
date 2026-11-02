@@ -1,0 +1,18 @@
+/* 그룹챗: 화면 자체가 스크롤되고(안쪽 스크롤 없음), 입력창은 항상 화면 아래에 붙어 있음 */
+.chat { display:flex; flex-direction:column; min-height:calc(100vh - 310px); min-height:calc(100dvh - 310px); }
+.list { flex:1; display:flex; flex-direction:column; gap:12px; padding:6px 0 18px; }
+.empty { color:var(--mute); font-size:14px; margin:0; }
+.msg { display:flex; flex-direction:column; align-items:flex-start; max-width:85%; }
+.mine { align-self:flex-end; align-items:flex-end; }
+.who { font-size:13px; font-weight:700; margin-bottom:2px; }
+.bubble { background:var(--card); border:1px solid var(--line); padding:9px 13px; border-radius:16px; white-space:pre-wrap; word-break:break-word; }
+.mine .bubble { background:var(--accent); border-color:var(--accent); color:#14213d; }
+.time { color:var(--mute); font-size:12px; margin-top:2px; }
+.del { background:none; border:0; padding:0; margin-left:6px; font:inherit; font-size:12px; color:var(--mute); cursor:pointer; }
+.del:hover { color:var(--err); }
+.form { position:sticky; bottom:calc(58px + env(safe-area-inset-bottom)); z-index:30; background:var(--paper); border-top:1px solid var(--line); padding:10px 0 12px; }
+.field { position:relative; }
+.field input { width:100%; min-width:0; font:inherit; font-size:16px; padding:13px 96px 13px 16px; border:1px solid var(--line); border-radius:14px; background:var(--card); color:var(--fg); }
+.send { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
+.err { color:var(--err); margin:0 0 8px; font-size:14px; }
+@media (min-width:820px) { .form { bottom:0; } }
