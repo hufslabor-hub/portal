@@ -1,0 +1,13 @@
+.spacer { display:none; }
+.bar { position:fixed; left:0; right:0; bottom:0; z-index:60; display:flex; background:var(--card); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); box-shadow:0 -4px 18px rgba(20,33,61,.08); }
+.tab { flex:1; min-width:0; height:58px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; background:none; border:0; padding:0; cursor:pointer; font-family:inherit; font-size:11.5px; font-weight:600; color:var(--mute); }
+.tab svg { width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.tab svg.dots { fill:currentColor; stroke:none; }
+.on { color:var(--link); }
+.sheet { position:fixed; left:0; right:0; top:calc(60px + env(safe-area-inset-top)); bottom:calc(58px + env(safe-area-inset-bottom)); z-index:55; overflow-y:auto; background:var(--ink); color:#fff; padding:12px 20px 32px; }
+.sheet a { display:block; padding:16px 4px; font-size:19px; font-weight:600; color:#fff; border-bottom:1px solid rgba(255,255,255,.12); }
+.sheet small { display:block; margin:18px 0 0; color:var(--accent); font-weight:700; font-size:13px; }
+.sheet :global(.subl) { padding:12px 4px 12px 22px; font-size:16px; font-weight:500; opacity:.88; }
+.sheet button { background:none; border:0; color:#fff; font:inherit; font-size:19px; font-weight:600; padding:16px 4px; cursor:pointer; }
+@media (max-width:819px) { .spacer { display:block; height:calc(58px + env(safe-area-inset-bottom)); } }
+@media (min-width:820px) { .bar, .sheet { display:none; } }

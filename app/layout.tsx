@@ -5,7 +5,7 @@ import { getRole } from '@/lib/auth';
 import { getMenu } from '@/lib/menu';
 import { isLocked } from '@/lib/locks';
 import { memberLogout } from './member-actions';
-import MobileMenu from '@/components/MobileMenu';
+import BottomNav from '@/components/BottomNav';
 import InstallHint from '@/components/InstallHint';
 import { APPLY_URL, INSTAGRAM_URL, KAKAO_URL } from '@/lib/links';
 
@@ -56,7 +56,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {role === 'admin' && <div className="ni"><Link href="/admin">관리</Link></div>}
             <div className="ni">{role ? <form action={memberLogout}><button className="linkbtn">로그아웃</button></form> : <Link href="/login">로그인</Link>}</div>
           </nav>
-          <MobileMenu>
+        </div></header>
+        <div id="main" tabIndex={-1}>{children}</div>
+        <InstallHint />
+        <BottomNav>
               {items.map((m) => (
                 <div key={m.id}>
                   {m.href ? <L href={m.href}>{lab(m.name, m.href)}</L> : <small>{m.name}</small>}
@@ -68,10 +71,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {role && <Link href="/me">내 정보</Link>}
               {role === 'admin' && <Link href="/admin">관리자 화면</Link>}
               {role ? <form action={memberLogout}><button className="linkbtn" style={{ padding: '16px 4px', fontSize: 19 }}>로그아웃</button></form> : <Link href="/login">조합원 로그인</Link>}
-            </MobileMenu>
-        </div></header>
-        <div id="main" tabIndex={-1}>{children}</div>
-        <InstallHint />
+        </BottomNav>
         <footer><div className="wrap">
           <b>한국외국어대학교 노동조합</b><br />
           서울캠퍼스 본관 602호 · <a href="tel:0221732611">02-2173-2611</a><br />
