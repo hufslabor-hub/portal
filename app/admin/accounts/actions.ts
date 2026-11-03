@@ -2,7 +2,7 @@
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth';
 import { limit } from '@/lib/ratelimit';
-import { RoleError, setAdminRole, updateAccount } from '@/lib/roles';
+import { RoleError, setAdminRole, setExecutiveRole, updateAccount } from '@/lib/roles';
 
 const t = (fd: FormData, k: string, max: number) => String(fd.get(k) ?? '').trim().slice(0, max);
 
@@ -24,6 +24,16 @@ export async function setAdmin(fd: FormData) {
   await run(`/admin/accounts${q ? '?q=' + encodeURIComponent(q) : ''}`, async () => {
     if (!(await limit('admin-accounts', a.uid, 60, 3600))) throw new RoleError('요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.');
     return setAdminRole({ uid: a.uid, email: a.email ?? '' }, uid, on);
+  });
+}
+
+/** 집행부 지정(on=1) / 해제(on=0) */
+export async function setExec(fd: FormData) {
+  const a = await requireAdmin();
+  const uid = t(fd, 'uid', 128), on = fd.get('on') === '1', q = t(fd, 'q', 60);
+  await run(`/admin/accounts${q ? '?q=' + encodeURIComponent(q) : ''}`, async () => {
+    if (!(await limit('admin-accounts', a.uid, 60, 3600))) throw new RoleError('요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.');
+    return setExecutiveRole({ uid: a.uid, email: a.email ?? '' }, uid, on);
   });
 }
 

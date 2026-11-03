@@ -6,7 +6,8 @@ import { adminAuth } from './firebase';
 export const SESSION = 'session';
 export const SESSION_SEC = 60 * 60 * 24 * 5;
 export type Role = 'admin' | 'member' | null;
-export type Session = { uid: string; role: 'admin' | 'member'; email: string; name: string };
+/** exec: 집행부 메뉴 열람 권한(집행부 또는 관리자) */
+export type Session = { uid: string; role: 'admin' | 'member'; email: string; name: string; exec: boolean };
 
 /** 쿠키의 세션을 서버에서 검증. strict=true면 취소(차단)된 세션까지 확인(보호된 내용·쓰기에 사용). */
 export async function getSession(strict = false): Promise<Session | null> {
@@ -15,7 +16,7 @@ export async function getSession(strict = false): Promise<Session | null> {
   try {
     const d = await adminAuth().verifySessionCookie(c, strict);
     const role = d.admin === true ? 'admin' : d.member === true ? 'member' : null;
-    return role ? { uid: d.uid, role, email: d.email ?? '', name: String(d.name ?? '') } : null;
+    return role ? { uid: d.uid, role, email: d.email ?? '', name: String(d.name ?? ''), exec: d.admin === true || d.executive === true } : null;
   } catch { return null; }
 }
 export async function getRole(strict = false): Promise<Role> { return (await getSession(strict))?.role ?? null; }
@@ -29,6 +30,15 @@ export async function requireSession(next: string): Promise<Session> {
   return s;
 }
 export async function requireMember(next: string) { await requireSession(next); }
+
+/** 집행부 또는 관리자인지(화면 표시용은 strict=false, 보호된 내용은 strict=true) */
+export async function getExec(strict = false): Promise<boolean> { return (await getSession(strict))?.exec ?? false; }
+/** 집행부·관리자만 통과. 로그인하지 않았으면 로그인 화면으로, 일반 조합원이면 안내 화면으로 보냄. */
+export async function requireExec(next: string): Promise<Session> {
+  const s = await requireSession(next);
+  if (!s.exec) redirect('/no-access');
+  return s;
+}
 
 /** 관리자(custom claim admin=true)만 통과. 모든 관리자 페이지와 서버 액션의 첫 줄에서 호출. */
 export async function requireAdmin() {

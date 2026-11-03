@@ -166,3 +166,16 @@ details.cmedit { flex-basis:100%; } details.cmedit summary { list-style:none; cu
 .acts details.cmedit summary:hover { border-color:var(--accent); }
 .acts details.cmedit summary.warn { color:#d64545; border-color:#d64545; }
 .acts details.cmedit form { margin-top:10px; }
+
+/* ── 레이아웃 수정 (globals.css 맨 아래에 붙여 넣기) ── */
+
+/* 1) 내용이 짧은 페이지에서도 푸터가 화면 맨 아래에 붙도록: 푸터 아래 베이지 영역 제거 */
+body { min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; padding-bottom:0; }
+body > #main { flex:1 0 auto; }
+/* 푸터가 숨겨지는 채팅 화면은 기존처럼 아래 안전 영역(아이폰 홈 바)을 유지.
+   그 밖의 화면은 푸터 자체가 안전 영역 여백을 갖고 있어서 body 여백이 겹쳐 푸터 아래에 띠가 생기던 것을 없앰 */
+body:has(.chat-page) { padding-bottom:env(safe-area-inset-bottom); }
+
+/* 2) 메뉴 링크를 누른 뒤 하위 메뉴(드롭다운)가 남지 않도록 (components/NavClose.tsx 가 nav-closed 를 붙였다 뗌) */
+.dnav.nav-closed .dd { display:none !important; }
+

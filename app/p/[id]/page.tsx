@@ -3,8 +3,8 @@ import Md from '@/components/Md';
 import Comments from '@/components/Comments';
 import { notFound } from 'next/navigation';
 import { excerptOf, firstImage, getPost } from '@/lib/content';
-import { getRole } from '@/lib/auth';
-import { getLocks, isLocked, requireUnlocked } from '@/lib/locks';
+import { getSession } from '@/lib/auth';
+import { getExecLocks, getLocks, isExecOnly, isLocked, requireUnlocked } from '@/lib/locks';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,8 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const post = await getPost(id);
   if (!post) return { title: '글을 찾을 수 없습니다' };
-  const [locks, role] = await Promise.all([getLocks(), getRole()]);
-  if (!role && isLocked(`/c/${post.category}`, locks)) return { title: '조합원 전용', robots: { index: false } };
+  const [locks, execLocks, session] = await Promise.all([getLocks(), getExecLocks(), getSession()]);
+  // 집행부 전용 글은 집행부·관리자가 아니면(일반 조합원 포함) 제목·미리보기를 드러내지 않음
+  if (isExecOnly(`/c/${post.category}`, execLocks) && !session?.exec) return { title: '집행부 전용', robots: { index: false } };
+  if (!session && isLocked(`/c/${post.category}`, locks)) return { title: '조합원 전용', robots: { index: false } };
   const description = excerptOf(post.body, 120) || '한국외국어대학교 노동조합';
   return { title: post.title, description, openGraph: { title: post.title, description, type: 'article', images: [firstImage(post.body) || '/og.png'] } };
 }

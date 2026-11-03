@@ -22,7 +22,7 @@ export default async function EditAccount({ params, searchParams }: { params: Pr
       {sp.ok && <p className="ok" role="status">{sp.ok}</p>}
       {sp.err && <p className="err" role="alert">{sp.err}</p>}
       <p className="meta" style={{ whiteSpace: 'normal' }}>
-        {a.admin ? <span className="badge">관리자</span> : a.member ? <span className="badge">조합원</span> : <span className="badge warn">승인 대기</span>}
+        {a.admin ? <span className="badge">관리자</span> : a.member ? <><span className="badge">조합원</span>{a.exec && <span className="badge">집행부</span>}</> : <span className="badge warn">승인 대기</span>}
         {' '}화면에는 “{a.name}”(으)로 표시됩니다.
       </p>
       {locked && <p className="err" role="status">관리자 계정의 정보는 본인만 수정할 수 있습니다.</p>}

@@ -1,12 +1,12 @@
 import './globals.css';
 import Link from 'next/link';
 import type { Metadata, Viewport } from 'next';
-import { getRole } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { getMenu } from '@/lib/menu';
-import { isLocked } from '@/lib/locks';
+import { filterExecMenu, getExecLocks, isLocked } from '@/lib/locks';
 import { memberLogout } from './member-actions';
-import BottomNav from '@/components/BottomNav';
-import InstallHint from '@/components/InstallHint';
+import MobileMenu from '@/components/MobileMenu';
+import NavClose from '@/components/NavClose';
 import { APPLY_URL, INSTAGRAM_URL, KAKAO_URL } from '@/lib/links';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL
@@ -16,8 +16,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: { default: 'HUFS UNION - 한국외국어대학교 노동조합', template: '%s - HUFS UNION' },
   description: '한국외국어대학교 노동조합 공식 홈페이지',
-  appleWebApp: { capable: true, title: 'HUFS UNION', statusBarStyle: 'black-translucent' },
-  other: { 'apple-mobile-web-app-capable': 'yes' },
   openGraph: {
     title: '한국외국어대학교 노동조합',
     description: '공고와 교섭 소식을 가장 먼저 확인하세요.',
@@ -34,8 +32,10 @@ function L({ href, children, className }: { href: string; children: React.ReactN
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const role = await getRole();
-  const { items, locks } = await getMenu();
+  const session = await getSession();
+  const role = session?.role ?? null;
+  const [{ items: allItems, locks }, execLocks] = await Promise.all([getMenu(), getExecLocks()]);
+  const items = filterExecMenu(allItems, session?.exec ?? false, execLocks);   // 집행부 전용 메뉴는 집행부·관리자에게만 보임
   const lab = (n: string, href: string) => (!role && isLocked(href, locks) ? `${n} 🔒` : n);
   return (
     <html lang="ko">
@@ -56,10 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {role === 'admin' && <div className="ni"><Link href="/admin">관리</Link></div>}
             <div className="ni">{role ? <form action={memberLogout}><button className="linkbtn">로그아웃</button></form> : <Link href="/login">로그인</Link>}</div>
           </nav>
-        </div></header>
-        <div id="main" tabIndex={-1}>{children}</div>
-        <InstallHint />
-        <BottomNav>
+          <MobileMenu>
               {items.map((m) => (
                 <div key={m.id}>
                   {m.href ? <L href={m.href}>{lab(m.name, m.href)}</L> : <small>{m.name}</small>}
@@ -71,12 +68,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {role && <Link href="/me">내 정보</Link>}
               {role === 'admin' && <Link href="/admin">관리자 화면</Link>}
               {role ? <form action={memberLogout}><button className="linkbtn" style={{ padding: '16px 4px', fontSize: 19 }}>로그아웃</button></form> : <Link href="/login">조합원 로그인</Link>}
-        </BottomNav>
+            </MobileMenu>
+          <NavClose />
+        </div></header>
+        <div id="main" tabIndex={-1}>{children}</div>
         <footer><div className="wrap">
           <b>한국외국어대학교 노동조합</b><br />
           서울캠퍼스 본관 602호 · <a href="tel:0221732611">02-2173-2611</a><br />
           글로벌캠퍼스 백년관 922호<br />
-          <a href="mailto:hufslabor@hufs.ac.kr">hufslabor@hufs.ac.kr</a> · <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">가입신청서</a> · <a href={KAKAO_URL} target="_blank" rel="noopener noreferrer">카카오 채널</a> · <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">인스타그램</a> · <Link href="/install">앱으로 설치</Link>
+          <a href="mailto:hufslabor@hufs.ac.kr">hufslabor@hufs.ac.kr</a> · <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">가입신청서</a> · <a href={KAKAO_URL} target="_blank" rel="noopener noreferrer">카카오 채널</a> · <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">인스타그램</a>
         </div></footer>
       </body>
     </html>

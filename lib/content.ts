@@ -10,6 +10,7 @@ export const CATEGORIES = {
   letter: '위원장 서신',
   newsletter: '뉴스레터',
   forms: '양식',
+  exec: '집행부',   // 집행부·관리자만 열람 (lib/locks.ts 의 ALWAYS_EXEC)
 } as const;
 export type Cat = keyof typeof CATEGORIES;
 export const isCat = (v: string): v is Cat => v in CATEGORIES;
@@ -63,7 +64,8 @@ export const getRecent = unstable_cache(async (category: Cat, n: number) => {
 /** 검색용 목록: 제목과 본문 앞 1,500자(캐시 크기 제한 때문). 15분 캐시 */
 export const getSearchIndex = unstable_cache(async () => {
   const s = await db().collection('posts').orderBy('createdAt', 'desc').limit(500).get();
-  return s.docs.filter((d) => d.data().published !== false).map((d) => {
+  // 집행부 게시판 글은 검색 목록에 넣지 않음(전체 공개 검색에서 제목·본문이 노출되지 않도록)
+  return s.docs.filter((d) => d.data().published !== false && d.data().category !== 'exec').map((d) => {
     const v = d.data();
     return { id: d.id, title: String(v.title), category: v.category as Cat, createdAt: v.createdAt.toDate().toISOString(), text: toPlain(String(v.body ?? '')).slice(0, 1500) };
   });

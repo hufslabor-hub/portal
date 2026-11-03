@@ -3,12 +3,13 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { db } from './firebase';
 
 /** 관리자 작업 기록(누가 · 언제 · 무엇을). Firestore audit_logs 컬렉션에 서버만 쓰고 읽습니다. */
-export type AuditAction = 'admin_grant' | 'admin_revoke' | 'member_edit' | 'home_edit' | 'home_reset';
+export type AuditAction = 'admin_grant' | 'admin_revoke' | 'exec_grant' | 'exec_revoke' | 'exec_path_add' | 'exec_path_remove' | 'member_edit' | 'home_edit' | 'home_reset';
 export type AuditEntry = { actorUid: string; actorEmail: string; action: AuditAction; targetUid?: string; targetEmail?: string; detail?: string };
 export type AuditRow = { id: string; at: number; actorEmail: string; action: AuditAction; targetEmail: string; detail: string };
 
 export const AUDIT_LABEL: Record<AuditAction, string> = {
-  admin_grant: '관리자 지정', admin_revoke: '관리자 해제', member_edit: '조합원 정보 수정', home_edit: '메인 문구 수정', home_reset: '메인 문구 초기화',
+  admin_grant: '관리자 지정', admin_revoke: '관리자 해제', exec_grant: '집행부 지정', exec_revoke: '집행부 해제',
+  exec_path_add: '집행부 전용 주소 추가', exec_path_remove: '집행부 전용 주소 해제', member_edit: '조합원 정보 수정', home_edit: '메인 문구 수정', home_reset: '메인 문구 초기화',
 };
 
 /** 기록 실패가 본 작업을 막지는 않지만 서버 로그에 남깁니다. */

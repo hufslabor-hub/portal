@@ -4,12 +4,13 @@ import { logAudit } from './audit';
 import { splitName } from './members';
 
 /**
- * 권한 구조(기존과 동일): Firebase 계정의 custom claim
+ * 권한 구조: Firebase 계정의 custom claim
  *   member=true : 승인된 조합원        admin=true : 관리자(조합원 중에서 지정)
+ *   executive=true : 집행부(집행부 메뉴 열람). 관리자는 따로 지정하지 않아도 집행부 메뉴를 열람할 수 있음
  * 관리자 지정/해제와 조합원 정보 수정은 모두 관리자만 할 수 있고, 모든 작업은 변경 기록(audit_logs)에 남습니다.
  */
 type U = { uid: string; email?: string; displayName?: string; customClaims?: Record<string, unknown> };
-export type Account = { uid: string; email: string; raw: string; name: string; admin: boolean; member: boolean };
+export type Account = { uid: string; email: string; raw: string; name: string; admin: boolean; exec: boolean; member: boolean };
 export type Actor = { uid: string; email: string };
 
 export class RoleError extends Error {}
@@ -19,7 +20,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export const toAccount = (u: U): Account => {
   const raw = u.displayName ?? '';
-  return { uid: u.uid, email: u.email ?? '', raw, name: splitName(raw).name || raw || '-', admin: u.customClaims?.admin === true, member: u.customClaims?.member === true };
+  return { uid: u.uid, email: u.email ?? '', raw, name: splitName(raw).name || raw || '-', admin: u.customClaims?.admin === true, exec: u.customClaims?.executive === true, member: u.customClaims?.member === true };
 };
 export const byName = (a: Account, b: Account) => a.name.localeCompare(b.name, 'ko') || a.email.localeCompare(b.email);
 
@@ -70,6 +71,26 @@ export async function setAdminRole(actor: Actor, uid: string, on: boolean): Prom
   await adminAuth().revokeRefreshTokens(uid);        // 이미 로그인한 기기의 관리자 세션도 즉시 무효화
   await logAudit({ actorUid: actor.uid, actorEmail: actor.email, action: 'admin_revoke', targetUid: uid, targetEmail: u.email });
   return `${who} 님의 관리자 권한을 해제했습니다. 이미 로그인한 기기에서도 바로 로그아웃됩니다.`;
+}
+
+/** 승인된 조합원을 집행부로 지정(on=true)하거나 해제(on=false). 집행부 메뉴(집행부 전용 페이지·게시판)를 볼 수 있게 됩니다. */
+export async function setExecutiveRole(actor: Actor, uid: string, on: boolean): Promise<string> {
+  const u = await mustGet(uid);
+  const claims = u.customClaims ?? {};
+  const who = toAccount(u).name;
+  if (claims.admin === true) throw new RoleError('관리자는 집행부 메뉴를 열람할 수 있어 따로 지정할 필요가 없습니다.');
+  if (on) {
+    if (claims.executive === true) throw new RoleError('이미 집행부입니다.');
+    if (claims.member !== true) throw new RoleError('승인된 조합원만 집행부로 지정할 수 있습니다. 먼저 조합원 관리에서 승인해 주세요.');
+    await adminAuth().setCustomUserClaims(uid, { ...claims, executive: true });
+    await logAudit({ actorUid: actor.uid, actorEmail: actor.email, action: 'exec_grant', targetUid: uid, targetEmail: u.email });
+    return `${who} 님을 집행부로 지정했습니다. 지정된 분이 다시 로그인하면 집행부 메뉴가 보입니다.`;
+  }
+  if (claims.executive !== true) throw new RoleError('집행부가 아닙니다.');
+  await adminAuth().setCustomUserClaims(uid, { ...claims, executive: false });
+  await adminAuth().revokeRefreshTokens(uid);        // 이미 로그인한 기기에서도 집행부 열람을 즉시 막기 위해 세션 취소
+  await logAudit({ actorUid: actor.uid, actorEmail: actor.email, action: 'exec_revoke', targetUid: uid, targetEmail: u.email });
+  return `${who} 님의 집행부 권한을 해제했습니다. 이미 로그인한 기기에서도 바로 로그아웃됩니다.`;
 }
 
 /** 조합원 정보(이름·이메일) 수정. 관리자 계정은 본인만 고칠 수 있음(다른 관리자가 이메일을 바꿔 계정을 가로채는 것을 방지). */
