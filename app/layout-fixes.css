@@ -1,0 +1,9 @@
+/* ── 레이아웃 수정 ── */
+/* 1) 내용이 짧은 페이지에서도 푸터가 화면 맨 아래에 붙도록(푸터 아래 베이지 영역 제거).
+      본문 아래 여백은 푸터·하단 메뉴 안내 여백(BottomNav)이 각각 갖고 있어서 body 여백은 두지 않음 */
+body { min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; padding-bottom:0; }
+body > #main { flex:1 0 auto; }
+body > footer { flex-shrink:0; }
+
+/* 2) 메뉴 링크를 누른 뒤 하위 메뉴(드롭다운)가 남지 않도록 (components/NavClose.tsx 가 nav-closed 를 붙였다 뗌) */
+.dnav.nav-closed .dd { display:none !important; }

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { CATEGORIES, PAGE_SIZE, getSearchIndex, isCat, type Cat } from '@/lib/content';
-import { getRole } from '@/lib/auth';
-import { getLocks, isLocked } from '@/lib/locks';
+import { getSession } from '@/lib/auth';
+import { getExecLocks, getLocks, isExecOnly, isLocked } from '@/lib/locks';
 import Pager from '@/components/Pager';
 
 export const dynamic = 'force-dynamic';
@@ -10,9 +10,10 @@ export const metadata = { title: '검색' };
 export default async function Search({ searchParams }: { searchParams: Promise<{ q?: string; cat?: string; page?: string }> }) {
   const sp = await searchParams;
   const q = (sp.q ?? '').trim().slice(0, 60);
-  const [role, locks] = await Promise.all([getRole(true), getLocks()]);
+  const [session, locks, execLocks] = await Promise.all([getSession(true), getLocks(), getExecLocks()]);
+  const role = session?.role ?? null;
   // 로그인하지 않은 사람에게는 조합원 전용 게시판의 글을 검색 결과에도 보여 주지 않음
-  const cats = (Object.keys(CATEGORIES) as Cat[]).filter((c) => role || !isLocked(`/c/${c}`, locks));
+  const cats = (Object.keys(CATEGORIES) as Cat[]).filter((c) => (role || !isLocked(`/c/${c}`, locks)) && (session?.exec || !isExecOnly(`/c/${c}`, execLocks)));
   const cat = sp.cat && isCat(sp.cat) && cats.includes(sp.cat) ? sp.cat : '';
   const page = Math.max(1, Math.min(500, Number(sp.page) || 1));
   const tokens = q.toLowerCase().split(/\s+/).filter(Boolean).slice(0, 5);

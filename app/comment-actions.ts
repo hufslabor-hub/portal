@@ -5,15 +5,23 @@ import { getSession } from '@/lib/auth';
 import { anonHash } from '@/lib/anon';
 import { limit } from '@/lib/ratelimit';
 import { MAX_COMMENT, itemsRef, okCommentId, okPostId, okScope, safePath } from '@/lib/comments';
+import { getPost } from '@/lib/content';
+import { requireUnlocked } from '@/lib/locks';
 
 const t = (fd: FormData, k: string, max: number) => String(fd.get(k) ?? '').replace(/\r\n/g, '\n').trim().slice(0, max);
 
 // 실패해도 쓰던 내용이 사라지지 않도록 본문을 함께 돌려줍니다.
 export type CommentState = { error: string; body: string } | null;
 
-async function me(path: string) {
+async function me(path: string, scope?: string, postId?: string) {
   const s = await getSession(true);
   if (!s) redirect(`/login?next=${encodeURIComponent(path)}`);
+  // 글 댓글이면 그 글의 게시판 권한(조합원 전용·집행부 전용)도 서버에서 확인
+  if (scope === 'post' && postId) {
+    const post = await getPost(postId);
+    if (!post) throw new Error('글을 찾을 수 없습니다.');
+    await requireUnlocked(`/c/${post.category}`, path);
+  }
   return s;
 }
 
@@ -22,7 +30,7 @@ export async function addComment(_p: CommentState, fd: FormData): Promise<Commen
   const scope = t(fd, 'scope', 32), postId = t(fd, 'postId', 200), path = safePath(t(fd, 'path', 320)), body = t(fd, 'body', MAX_COMMENT * 5);
   const fail = (error: string): CommentState => ({ error, body });
   if (!okScope(scope) || !okPostId(postId)) return fail('잘못된 요청입니다.');
-  const s = await me(path);
+  const s = await me(path, scope, postId);
   if (!body) return fail('댓글 내용을 입력해 주세요.');
   if (body.length > MAX_COMMENT) return fail(`댓글은 ${MAX_COMMENT}자 이하로 써 주세요. (현재 ${body.length}자)`);
   if (!(await limit('post-comment', s.uid, 20, 3600))) return fail('댓글은 1시간에 20개까지 쓸 수 있습니다. 잠시 후 다시 시도해 주세요.');
@@ -34,7 +42,7 @@ export async function addComment(_p: CommentState, fd: FormData): Promise<Commen
 export async function updateComment(fd: FormData) {
   const scope = t(fd, 'scope', 32), postId = t(fd, 'postId', 200), path = safePath(t(fd, 'path', 320)), id = t(fd, 'id', 40), body = t(fd, 'body', MAX_COMMENT * 5);
   if (!okScope(scope) || !okPostId(postId) || !okCommentId(id)) throw new Error('잘못된 요청입니다.');
-  const s = await me(path);
+  const s = await me(path, scope, postId);
   if (!body || body.length > MAX_COMMENT) throw new Error(`댓글은 1자 이상 ${MAX_COMMENT}자 이하로 써 주세요.`);
   if (!(await limit('post-comment-edit', s.uid, 30, 3600))) throw new Error('수정 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.');
   const ref = itemsRef(scope, postId).doc(id);
@@ -49,7 +57,7 @@ export async function updateComment(fd: FormData) {
 export async function deleteComment(fd: FormData) {
   const scope = t(fd, 'scope', 32), postId = t(fd, 'postId', 200), path = safePath(t(fd, 'path', 320)), id = t(fd, 'id', 40);
   if (!okScope(scope) || !okPostId(postId) || !okCommentId(id)) throw new Error('잘못된 요청입니다.');
-  const s = await me(path);
+  const s = await me(path, scope, postId);
   const ref = itemsRef(scope, postId).doc(id);
   const c = await ref.get();
   if (c.exists) {
