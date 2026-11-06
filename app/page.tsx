@@ -3,6 +3,7 @@ import { CATEGORIES, getRecent, type Cat } from '@/lib/content';
 import { APPLY_URL } from '@/lib/links';
 import { getRole } from '@/lib/auth';
 import { getLocks, isLocked } from '@/lib/locks';
+import { getMenu } from '@/lib/menu';
 import { getHomeText } from '@/lib/home-text';
 import HeroTitle from '@/components/HeroTitle';
 
@@ -10,10 +11,12 @@ export const dynamic = 'force-dynamic';
 
 
 export default async function Home() {
-  const [role, locks, tx] = await Promise.all([getRole(true), getLocks(), getHomeText()]);   // tx: 관리자가 고친 메인 문구(없으면 기본 문구)
+  const [role, locks, tx, menu] = await Promise.all([getRole(true), getLocks(), getHomeText(), getMenu()]);   // tx: 관리자가 고친 메인 문구(없으면 기본 문구)
   const keys = (['notice', 'news', 'bargaining'] as Cat[]).filter((k) => role || !isLocked(`/c/${k}`, locks));
   const lists = await Promise.all(keys.map((k) => getRecent(k, 4)));
   const mark = (h: string) => (!role && isLocked(h, locks) ? ' 🔒' : '');
+  // '조합사업' 칸은 메뉴 관리에 있는 '조합사업' 메뉴의 주소로 연결(메뉴 주소를 바꿔도 따라감)
+  const projectsHref = menu.items.find((i) => i.name === '조합사업')?.href || '/page/projects';
   return (
     <>
       <section className="hero"><div className="wrap">
@@ -28,7 +31,7 @@ export default async function Home() {
       <main><div className="wrap">
         <div className="quick">
           <Link href="/page/agreement">단체협약{mark('/page/agreement')}</Link><Link href="/page/bylaws">규약{mark('/page/bylaws')}</Link>
-          <Link href="/community">커뮤니티{mark('/community')}</Link><Link href="/page/projects">조합사업{mark('/page/projects')}</Link>
+          <Link href="/community">커뮤니티{mark('/community')}</Link><Link href={projectsHref}>조합사업{mark(projectsHref)}</Link>
         </div>
         {keys.map((k, i) => (
           <section key={k}>

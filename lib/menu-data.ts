@@ -1,4 +1,4 @@
-export type MenuItem = { id: string; name: string; href: string; sub?: MenuItem[] };
+export type MenuItem = { id: string; name: string; href: string; exec?: boolean; sub?: MenuItem[] };   // exec: 집행부·관리자에게만 메뉴에 보임
 
 // 관리자가 아직 메뉴를 고친 적이 없을 때 쓰는 기본 메뉴
 export const DEFAULT_MENU: MenuItem[] = [

@@ -45,19 +45,21 @@ async function run(fn: () => Promise<void>): Promise<never> {
 export async function menuSave(fd: FormData) {
   await requireAdmin();
   const id = t(fd, 'id', 20), parent = t(fd, 'parent', 20), name = t(fd, 'name', 20);
+  const exec = fd.get('exec') === 'on';   // 집행부 전용(메뉴에서 숨김)
   await run(async () => {
     if (!name) throw new Error('이름을 입력하세요.');
     await mutate((items) => {
       if (id) {
         const loc = locate(items, id); if (!loc) throw new Error('메뉴를 찾을 수 없습니다.');
         loc.arr[loc.i].name = name; loc.arr[loc.i].href = cleanHref(t(fd, 'href', 300), !loc.top);
+        if (exec) loc.arr[loc.i].exec = true; else delete loc.arr[loc.i].exec;
       } else if (parent) {
         const p = items.find((x) => x.id === parent); if (!p) throw new Error('상위 메뉴를 찾을 수 없습니다.');
         if ((p.sub?.length ?? 0) >= 15) throw new Error('하위 메뉴는 15개까지 만들 수 있습니다.');
-        p.sub = [...(p.sub ?? []), { id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), true) }];
+        p.sub = [...(p.sub ?? []), { id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), true), ...(exec ? { exec: true } : {}) }];
       } else {
         if (items.length >= 12) throw new Error('상위 메뉴는 12개까지 만들 수 있습니다.');
-        items.push({ id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), false) });
+        items.push({ id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), false), ...(exec ? { exec: true } : {}) });
       }
     });
     // 🔒 조합원 전용 선택(사이트 안 주소에만 적용)

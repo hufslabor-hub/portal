@@ -25,13 +25,16 @@ export async function loadExecLocks(): Promise<string[]> {
 export const getExecLocks = unstable_cache(loadExecLocks, ['exec-locks'], { revalidate: 30, tags: ['execlocks'] });
 
 /** 메뉴에서 집행부 전용 항목을 숨김(집행부·관리자에게는 전부 보임). 모든 하위가 숨겨진 묶음 메뉴도 숨김. */
-export function filterExecMenu<S extends { href: string }, T extends { href: string; sub?: S[] }>(items: T[], canExec: boolean, execLocks: string[]): T[] {
+export const isExecHidden = (x: { href: string; exec?: boolean }, execLocks: string[]) => x.exec === true || isExecOnly(x.href, execLocks);
+
+export function filterExecMenu<S extends { href: string; exec?: boolean }, T extends { href: string; exec?: boolean; sub?: S[] }>(items: T[], canExec: boolean, execLocks: string[]): T[] {
   if (canExec) return items;
-  const hide = (h: string) => isExecOnly(h, execLocks);
+  // 항목에 '집행부 전용(메뉴 숨김)'을 체크했거나, 주소가 집행부 전용이면 숨김(바깥 사이트 주소도 숨길 수 있음). 묶음 메뉴를 체크하면 하위 메뉴도 함께 숨김
+  const hide = (x: { href: string; exec?: boolean }) => isExecHidden(x, execLocks);
   return items.flatMap((m) => {
-    if (hide(m.href)) return [];
+    if (hide(m)) return [];
     if (!m.sub) return [m];
-    const sub = m.sub.filter((x) => !hide(x.href));
+    const sub = m.sub.filter((x) => !hide(x));
     if (m.sub.length > 0 && sub.length === 0 && !m.href) return [];
     return [{ ...m, sub }];
   });

@@ -26,6 +26,7 @@ function Row({ it, sub, locks }: { it: MenuItem; sub?: boolean; locks: string[] 
         <input name="name" defaultValue={it.name} maxLength={20} required aria-label="메뉴 이름" />
         <input name="href" defaultValue={it.href} maxLength={300} required={sub} aria-label="주소" placeholder={sub ? '/주소 또는 https://…' : '(비우면 하위 메뉴만 펼침)'} />
         <LockBox href={it.href} locks={locks} />
+        <label className="chk lk"><input type="checkbox" name="exec" defaultChecked={it.exec === true} /> 집행부 전용(메뉴 숨김)</label>
         <button className="btn sm">저장</button>
       </form>
       <div className="btns">
@@ -49,6 +50,7 @@ export default async function AdminMenu({ searchParams }: { searchParams: Promis
       {err && <p className="err" role="alert">저장하지 못했습니다: {err}</p>}
       {ok && <p className="ok" role="status">저장했습니다. 사이트 메뉴에는 최대 30초 안에 반영됩니다.</p>}
       <p className="meta" style={{ whiteSpace: 'normal' }}>주소는 <code>/c/news</code>(게시판), <code>/page/about</code>(페이지)처럼 사이트 안 주소이거나 <code>https://</code>로 시작하는 외부 주소입니다. <b>🔒 조합원 전용</b>을 체크하면 그 주소는 로그인한 조합원만 볼 수 있고, 메뉴에도 자물쇠가 표시됩니다. 외부 주소와 주소 없는 상위 메뉴는 잠글 수 없습니다.</p>
+      <p className="meta" style={{ whiteSpace: 'normal' }}><b>집행부 전용(메뉴 숨김)</b>을 체크하면 그 메뉴는 집행부·관리자에게만 보입니다. 묶음 메뉴에 체크하면 하위 메뉴도 함께 숨겨집니다. 단, 바깥 사이트(<code>https://…</code>) 주소는 메뉴만 숨길 뿐 주소 자체를 막지는 못하니, 그 사이트의 로그인 제한을 따로 확인하세요.</p>
       {items.map((it) => (
         <section key={it.id} className="mgroup">
           <Row it={it} locks={locks} />
@@ -60,6 +62,7 @@ export default async function AdminMenu({ searchParams }: { searchParams: Promis
               <input name="name" maxLength={20} required placeholder="새 하위 메뉴 이름" aria-label="새 하위 메뉴 이름" />
               <input name="href" maxLength={300} required placeholder="/주소 또는 https://…" aria-label="새 하위 메뉴 주소" />
               <label className="chk lk"><input type="checkbox" name="lock" /> 🔒 조합원 전용</label>
+              <label className="chk lk"><input type="checkbox" name="exec" /> 집행부 전용(메뉴 숨김)</label>
               <button className="btn sm">+ 하위 메뉴</button>
             </form>
           </div>
@@ -71,6 +74,7 @@ export default async function AdminMenu({ searchParams }: { searchParams: Promis
         <input name="name" maxLength={20} required placeholder="메뉴 이름" aria-label="새 상위 메뉴 이름" />
         <input name="href" maxLength={300} placeholder="주소(비워도 됨)" aria-label="새 상위 메뉴 주소" />
         <label className="chk lk"><input type="checkbox" name="lock" /> 🔒 조합원 전용</label>
+        <label className="chk lk"><input type="checkbox" name="exec" /> 집행부 전용(메뉴 숨김)</label>
         <button className="btn sm">+ 상위 메뉴</button>
       </form>
       <form action={menuReset} style={{ marginTop: 32 }}><button className="btn sm ghost">기본 메뉴로 되돌리기</button></form>
