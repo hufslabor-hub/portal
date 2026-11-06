@@ -151,12 +151,6 @@ details.cmedit { flex-basis:100%; } details.cmedit summary { list-style:none; cu
 .cmts .cmform { margin:8px 0 0; }
 .cmts .cmform textarea, .cmts details .form textarea { resize:vertical; min-height:84px; }
 
-/* ── 원본의 "1)" 괄호 번호 목록 (globals.css 맨 아래에 붙여 넣기) ── */
-/* Md.tsx 가 "1)" 로 쓴 번호 목록에만 paren 클래스를 붙입니다. "1." 목록은 그대로 둡니다. */
-.prose ol.paren { list-style:none; padding-left:0; }
-.prose ol.paren > li { position:relative; padding-left:2em; }
-.prose ol.paren > li::before { content:counter(list-item) ")"; position:absolute; left:0; }
-
 /* ── 관리자·조합원 관리 화면 (globals.css 맨 아래에 붙여 넣기) ── */
 /* 카드 안 버튼들(정보 수정 / 관리자 지정·해제)을 한 줄에 나란히, 확인 창을 펼치면 한 줄 전체로 */
 .acts { display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; margin-top:12px; }
@@ -179,3 +173,9 @@ body:has(.chat-page) { padding-bottom:env(safe-area-inset-bottom); }
 /* 2) 메뉴 링크를 누른 뒤 하위 메뉴(드롭다운)가 남지 않도록 (components/NavClose.tsx 가 nav-closed 를 붙였다 뗌) */
 .dnav.nav-closed .dd { display:none !important; }
 
+
+/* ── 원본의 "1)" 괄호 번호 목록 (globals.css 맨 아래에 붙여 넣기) ── */
+/* Md.tsx 가 "1)" 로 쓴 번호 목록에만 paren 클래스를 붙입니다. "1." 목록은 그대로 둡니다. */
+.prose ol.paren { list-style:none; padding-left:0; }
+.prose ol.paren > li { position:relative; padding-left:2em; }
+.prose ol.paren > li::before { content:counter(list-item) ")"; position:absolute; left:0; }
