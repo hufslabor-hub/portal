@@ -1,0 +1,4 @@
+/* "1) 2) 3)" 목록: 번호는 글자로 붙어 있고, 두 번째 줄부터는 번호 뒤 글자에 맞춰 들여씀 */
+.parenx { list-style:none; padding-left:0; margin:.8em 0; }
+.parenx > li { padding-left:2em; text-indent:-2em; margin:.25em 0; }
+.parenx > li > ul, .parenx > li > ol { text-indent:0; }
