@@ -7,7 +7,8 @@ import { limit } from '@/lib/ratelimit';
 
 const idt = (path: string, body: object) =>
   fetch(`https://identitytoolkit.googleapis.com/v1/accounts:${path}?key=${process.env.FIREBASE_WEB_API_KEY}`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    // X-Firebase-Locale: 비밀번호 재설정 메일을 한국어 기본 양식으로 보냄
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Firebase-Locale': 'ko' }, body: JSON.stringify(body),
   });
 const f = (fd: FormData, k: string, max: number) => String(fd.get(k) ?? '').trim().slice(0, max);
 const TOO_MANY = '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.';

@@ -21,7 +21,7 @@ for (const [email, name = '', dept = ''] of rows) {
     await auth.setCustomUserClaims(u.uid, { ...(u.customClaims ?? {}), member: true });
     if (send) {
       const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_WEB_API_KEY}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestType: 'PASSWORD_RESET', email }) });
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Firebase-Locale': 'ko' }, body: JSON.stringify({ requestType: 'PASSWORD_RESET', email }) });
       if (!r.ok) throw new Error('메일 발송 실패');
       await sleep(400);
     }
