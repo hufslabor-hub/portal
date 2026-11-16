@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { deleteChat, sendChat } from '@/app/chat/actions';
 import ui from './ChatRoom.module.css';
+import { splitLinks } from '@/lib/linkify';
 
 type Msg = { id: string; name: string; text: string; ts: number; mine: boolean };
 const hm = (ts: number) => new Date(ts).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' });
@@ -72,7 +73,7 @@ export default function ChatRoom({ initial, isAdmin }: { initial: Msg[]; isAdmin
         {msgs.map((m) => (
           <div key={m.id} className={`${ui.msg}${m.mine ? ` ${ui.mine}` : ''}`}>
             {!m.mine && <span className={ui.who}>{m.name}</span>}
-            <div className={ui.bubble}>{m.text}</div>
+            <div className={ui.bubble}>{splitLinks(m.text).map((p, i) => (p.href ? <a key={i} href={p.href} target="_blank" rel="noopener noreferrer nofollow ugc" className={ui.link}>{p.text}</a> : p.text))}</div>
             <span className={ui.time}>{hm(m.ts)}{(m.mine || isAdmin) && <button type="button" className={ui.del} onClick={() => remove(m.id)}>삭제</button>}</span>
           </div>
         ))}

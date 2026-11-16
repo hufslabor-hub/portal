@@ -3,7 +3,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { db } from '@/lib/firebase';
 import { getSession } from '@/lib/auth';
 import { limit } from '@/lib/ratelimit';
-import { splitName } from '@/lib/members';
+import { anonHash } from '@/lib/anon';
 import { toMsg, type ChatMsg } from '@/lib/chat';
 
 export async function sendChat(raw: string): Promise<{ ok: true; msg: ChatMsg } | { ok: false; error: string }> {
@@ -12,11 +12,11 @@ export async function sendChat(raw: string): Promise<{ ok: true; msg: ChatMsg } 
   const text = String(raw ?? '').replace(/\r\n/g, '\n').trim().slice(0, 500);
   if (!text) return { ok: false, error: '내용을 입력하세요.' };
   if (!(await limit('chat', s.uid, 20, 60))) return { ok: false, error: '메시지를 너무 빨리 보내고 있습니다. 잠시 후 다시 보내 주세요.' };
-  const name = splitName(s.name).name || s.email.split('@')[0] || '조합원';
   const now = Date.now();
   const ref = db().collection('chat_messages').doc();
   // expireAt: Firestore TTL 정책을 걸면 60일 지난 대화는 자동 삭제됨
-  await ref.set({ uid: s.uid, name, text, createdAt: Timestamp.fromMillis(now), expireAt: Timestamp.fromMillis(now + 60 * 86400_000) });
+  // 이름·회원 번호는 저장하지 않고, 되돌릴 수 없는 암호값(authorHash)만 저장 → 본인 메시지 삭제 확인에만 쓰임
+  await ref.set({ authorHash: anonHash(s.uid), text, createdAt: Timestamp.fromMillis(now), expireAt: Timestamp.fromMillis(now + 60 * 86400_000) });
   return { ok: true, msg: toMsg(await ref.get(), s.uid) };
 }
 
@@ -25,7 +25,7 @@ export async function deleteChat(id: string): Promise<boolean> {
   if (!s || !/^[A-Za-z0-9]{10,40}$/.test(id)) return false;
   const ref = db().collection('chat_messages').doc(id);
   const d = await ref.get();
-  if (!d.exists || (s.role !== 'admin' && d.data()!.uid !== s.uid)) return false;
+  if (!d.exists || (s.role !== 'admin' && (d.data()!.authorHash ?? anonHash(String(d.data()!.uid ?? ''))) !== anonHash(s.uid))) return false;
   await ref.delete();
   return true;
 }

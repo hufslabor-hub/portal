@@ -16,3 +16,5 @@
 .send { position:absolute; right:6px; top:50%; transform:translateY(-50%); }
 .err { color:var(--err); margin:0 0 8px; font-size:14px; }
 @media (min-width:820px) { .form { bottom:0; } }
+.link { color:var(--link); text-decoration:underline; text-underline-offset:2px; word-break:break-all; }
+.mine .link { color:#14213d; }
