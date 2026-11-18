@@ -40,6 +40,18 @@ export function filterExecMenu<S extends { href: string; exec?: boolean }, T ext
   });
 }
 
+/** 로그인하지 않은 사람에게는 '조합원 전용' 표시가 된 항목(바깥 사이트 주소·묶음 메뉴 포함)을 숨김 */
+export function filterGuestMenu<S extends { href: string; members?: boolean }, T extends { href: string; members?: boolean; sub?: S[] }>(items: T[], loggedIn: boolean): T[] {
+  if (loggedIn) return items;
+  return items.flatMap((m) => {
+    if (m.members === true) return [];
+    if (!m.sub) return [m];
+    const sub = m.sub.filter((x) => x.members !== true);
+    if (m.sub.length > 0 && sub.length === 0 && !m.href) return [];
+    return [{ ...m, sub }];
+  });
+}
+
 export async function loadLocks(): Promise<string[]> {
   const d = await db().collection('settings').doc('locks').get();
   return d.exists ? (d.data()!.paths as string[]) : DEFAULT_LOCKS;

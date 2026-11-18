@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { Metadata, Viewport } from 'next';
 import { getSession } from '@/lib/auth';
 import { getMenu } from '@/lib/menu';
-import { filterExecMenu, getExecLocks, isLocked } from '@/lib/locks';
+import { filterExecMenu, filterGuestMenu, getExecLocks, isLocked } from '@/lib/locks';
 import { memberLogout } from './member-actions';
 import BottomNav from '@/components/BottomNav';
 import NavClose from '@/components/NavClose';
@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const session = await getSession();
   const role = session?.role ?? null;
   const [{ items: allItems, locks }, execLocks] = await Promise.all([getMenu(), getExecLocks()]);
-  const items = filterExecMenu(allItems, session?.exec ?? false, execLocks);   // 집행부 전용 메뉴는 집행부·관리자에게만 보임
+  const items = filterGuestMenu(filterExecMenu(allItems, session?.exec ?? false, execLocks), !!role);   // 집행부 전용 메뉴는 집행부·관리자에게만 보임
   const lab = (n: string, href: string) => (!role && isLocked(href, locks) ? `${n} 🔒` : n);
   return (
     <html lang="ko">

@@ -50,8 +50,8 @@ export default async function StaticPage({ params }: { params: Promise<{ slug: s
   let top = menu.items.find((i) => normPath(i.href) === `/page/${slug}`)
     ?? (page ? menu.items.find((i) => i.name === page.title && (i.sub?.length ?? 0) > 0) : undefined)
     ?? (slug === 'projects' ? menu.items.find((i) => i.name === '조합사업') : undefined);
-  if (top && !canExec && isExecHidden(top, execLocks)) top = undefined;
-  const subs: Card[] = top?.sub?.filter((x) => normPath(x.href) !== `/page/${slug}` && (canExec || !isExecHidden(x, execLocks))) ?? [];
+  if (top && ((!canExec && isExecHidden(top, execLocks)) || (!session && top.members))) top = undefined;
+  const subs: Card[] = top?.sub?.filter((x) => normPath(x.href) !== `/page/${slug}` && (canExec || !isExecHidden(x, execLocks)) && (session || !x.members)) ?? [];
 
   // 페이지 문서를 아직 만들지 않았어도, 메뉴에서 이 주소를 상위 메뉴로 쓰고 하위 메뉴가 있으면 카드로 보여 줌(404 방지)
   if (!page) {

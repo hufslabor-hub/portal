@@ -1,0 +1,18 @@
+/* 메뉴 관리 화면: 한 줄에 몰아 넣지 않고 [이름·주소] / [보는 사람 선택 · 저장] 두 줄로 정리, 좁은 화면에서는 세로로 쌓음 */
+.row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 14px; align-items:start; padding:12px; margin:8px 0; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+.top { padding:0; margin:0 0 6px; border:0; background:transparent; }
+.add { grid-template-columns:minmax(0,1fr); border-style:dashed; }
+.form { display:grid; gap:10px; min-width:0; }
+.fields { display:grid; grid-template-columns:minmax(110px,1fr) minmax(150px,2fr); gap:8px; }
+.fields input { width:100%; min-width:0; font:inherit; font-size:16px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--fg); }
+.opts { display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; }
+.opt { display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; white-space:nowrap; }
+.opt input { width:18px; height:18px; margin:0; }
+.save { margin-left:auto; }
+.tools { display:flex; align-items:center; gap:6px; }
+.tools form { margin:0; }
+@media (max-width:700px) {
+  .row { grid-template-columns:minmax(0,1fr); }
+  .fields { grid-template-columns:minmax(0,1fr); }
+  .tools { justify-content:flex-end; }
+}

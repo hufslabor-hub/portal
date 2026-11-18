@@ -46,6 +46,9 @@ export async function menuSave(fd: FormData) {
   await requireAdmin();
   const id = t(fd, 'id', 20), parent = t(fd, 'parent', 20), name = t(fd, 'name', 20);
   const exec = fd.get('exec') === 'on';   // 집행부 전용(메뉴에서 숨김)
+  const lockOn = fd.get('lock') === 'on';  // 🔒 조합원 전용
+  // 사이트 안 주소(항상 잠긴 곳 제외)는 잠금 목록으로 서버에서 막고, 바깥 주소·묶음 메뉴는 로그인하지 않은 사람에게 메뉴를 숨김(members 표시)
+  const flag = (it: MenuItem) => { if (lockOn && !it.href.startsWith('/')) it.members = true; else delete it.members;   // 사이트 안 주소는 잠금 목록(setLock)이 담당 };
   await run(async () => {
     if (!name) throw new Error('이름을 입력하세요.');
     await mutate((items) => {
@@ -53,19 +56,24 @@ export async function menuSave(fd: FormData) {
         const loc = locate(items, id); if (!loc) throw new Error('메뉴를 찾을 수 없습니다.');
         loc.arr[loc.i].name = name; loc.arr[loc.i].href = cleanHref(t(fd, 'href', 300), !loc.top);
         if (exec) loc.arr[loc.i].exec = true; else delete loc.arr[loc.i].exec;
+        flag(loc.arr[loc.i]);
       } else if (parent) {
         const p = items.find((x) => x.id === parent); if (!p) throw new Error('상위 메뉴를 찾을 수 없습니다.');
         if ((p.sub?.length ?? 0) >= 15) throw new Error('하위 메뉴는 15개까지 만들 수 있습니다.');
-        p.sub = [...(p.sub ?? []), { id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), true), ...(exec ? { exec: true } : {}) }];
+        const item: MenuItem = { id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), true), ...(exec ? { exec: true } : {}) };
+        flag(item);
+        p.sub = [...(p.sub ?? []), item];
       } else {
         if (items.length >= 12) throw new Error('상위 메뉴는 12개까지 만들 수 있습니다.');
-        items.push({ id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), false), ...(exec ? { exec: true } : {}) });
+        const item: MenuItem = { id: randomBytes(4).toString('hex'), name, href: cleanHref(t(fd, 'href', 300), false), ...(exec ? { exec: true } : {}) };
+        flag(item);
+        items.push(item);
       }
     });
     // 🔒 조합원 전용 선택(사이트 안 주소에만 적용)
     if (fd.get('lockable') === '1') {
       const href = cleanHref(t(fd, 'href', 300), false);
-      if (href.startsWith('/')) await setLock(href, fd.get('lock') === 'on');
+      if (href.startsWith('/')) await setLock(href, lockOn);
     }
   });
 }
