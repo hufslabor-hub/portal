@@ -48,7 +48,7 @@ export async function menuSave(fd: FormData) {
   const exec = fd.get('exec') === 'on';   // 집행부 전용(메뉴에서 숨김)
   const lockOn = fd.get('lock') === 'on';  // 🔒 조합원 전용
   // 사이트 안 주소(항상 잠긴 곳 제외)는 잠금 목록으로 서버에서 막고, 바깥 주소·묶음 메뉴는 로그인하지 않은 사람에게 메뉴를 숨김(members 표시)
-  const flag = (it: MenuItem) => { if (lockOn && !it.href.startsWith('/')) it.members = true; else delete it.members;   // 사이트 안 주소는 잠금 목록(setLock)이 담당 };
+  const flag = (it: MenuItem) => { if (lockOn && !it.href.startsWith('/')) it.members = true; else delete it.members; };   // 사이트 안 주소는 잠금 목록(setLock)이 담당
   await run(async () => {
     if (!name) throw new Error('이름을 입력하세요.');
     await mutate((items) => {
